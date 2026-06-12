@@ -42,7 +42,12 @@ _Compiled from a full codebase audit on 2026-06-12. These notes capture observat
 
 ## Developer notes for future sessions
 
-- Before adding any admin feature, **add auth middleware first** — `/admin/dashboard` and all future admin routes are currently open to the public. This is the single highest-priority gap.
 - If building out CMS sections (Home/About/Services/Solutions CMS, Contact Messages — all referenced as dead links in `admin/partials/sidebar.blade.php`), plan the migrations/models/controllers/routes as one coherent unit per section rather than partially wiring one piece — the sidebar already advertises these sections, so half-built features will be immediately visible/clickable.
 - The contact and appointment forms in `pages/contact.blade.php` and `pages/home.blade.php` are pure frontend markup with no `action`/backend wiring — confirm with the user what should happen on submission (store to DB? email notification? both?) before implementing, since this affects whether a `contact_messages` table is needed.
-- No git repository exists in this working directory as of this audit — if version control is wanted, `git init` will be needed (don't do this without asking, per standard workflow caution).
+
+## Phase A notes (2026-06-12)
+
+- Admin routes are now split into two groups in `routes/web.php`: a `guest`-middleware group (`admin.login`, `admin.login.submit`, `admin.password.request`, `admin.password.email`) and an `auth`-middleware group (`admin.dashboard`, `admin.logout`). Any new admin route must be added to the correct group.
+- Laravel 12's default `Authenticate`/`RedirectIfAuthenticated` middleware normally redirect to a route named `login`, which doesn't exist here. `bootstrap/app.php` now sets `redirectGuestsTo(route('admin.login'))` and `redirectUsersTo(route('admin.dashboard'))` — keep these in sync if route names ever change.
+- Login throttling uses Laravel's built-in `throttle:5,1` middleware on `admin.login.submit` (5 attempts/minute, keyed by IP+email by default) — no extra package needed.
+- Seeded test user (`test@example.com` / `password`) is now a real working login.

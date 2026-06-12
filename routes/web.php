@@ -27,31 +27,43 @@ Route::get('/contact', function () {
 
 Route::prefix('admin')->group(function () {
 
-    Route::get('/login', [AuthController::class, 'login'])
-        ->name('admin.login');
+    Route::middleware('guest')->group(function () {
 
-    Route::post('/login', [AuthController::class, 'loginSubmit'])
-        ->name('admin.login.submit');
+        Route::get('/login', [AuthController::class, 'login'])
+            ->name('admin.login');
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard.index');
-    })->name('admin.dashboard');
+        Route::post('/login', [AuthController::class, 'loginSubmit'])
+            ->middleware('throttle:5,1')
+            ->name('admin.login.submit');
 
-    Route::get('/forgot-password', function () {
-        return view('admin.auth.forgot-password');
-    })->name('admin.password.request');
+        Route::get('/forgot-password', function () {
+            return view('admin.auth.forgot-password');
+        })->name('admin.password.request');
 
-    Route::post('/forgot-password', function (Request $request) {
+        Route::post('/forgot-password', function (Request $request) {
 
-        $request->validate([
-            'email' => 'required|email'
-        ]);
+            $request->validate([
+                'email' => 'required|email'
+            ]);
 
-        return back()->with(
-            'success',
-            'Password reset link sent successfully.'
-        );
+            return back()->with(
+                'success',
+                'Password reset link sent successfully.'
+            );
 
-    })->name('admin.password.email');
+        })->name('admin.password.email');
+
+    });
+
+    Route::middleware('auth')->group(function () {
+
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard.index');
+        })->name('admin.dashboard');
+
+        Route::post('/logout', [AuthController::class, 'logout'])
+            ->name('admin.logout');
+
+    });
 
 });
