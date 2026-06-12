@@ -62,3 +62,10 @@ CMS transformation (Phases A-J per approved roadmap). Phase A complete; Phase B 
 - **Files modified**: `routes/web.php`, `app/Http/Controllers/Admin/AuthController.php`, `bootstrap/app.php`, `resources/views/admin/partials/navbar.blade.php`.
 - **Why**: Phase A of the approved CMS roadmap — the admin area was previously fully open and login accepted any credentials.
 - **Verified**: Manual end-to-end test via `php artisan serve` — unauthenticated `/admin/dashboard` redirects to `/admin/login` (302); valid login (`test@example.com`/`password`) redirects to dashboard (200); authenticated visit to `/admin/login` redirects to dashboard; logout invalidates session and dashboard becomes inaccessible again; invalid credentials redirect back to login with validation error.
+
+### 2026-06-12 — Phase A follow-up: scope global auth redirects to /admin
+
+- **What changed**: `redirectGuestsTo`/`redirectUsersTo` in `bootstrap/app.php` are global Laravel settings affecting any `auth`/`guest`-protected route, not just admin ones. Updated both closures to check `$request->is('admin/*')` — admin paths still redirect to `admin.login`/`admin.dashboard`, any other `auth`/`guest`-protected route (none exist yet) falls back to `home`. Prevents a future public-facing auth flow from being redirected into the admin panel.
+- **Files modified**: `bootstrap/app.php`.
+- **Why**: Reviewer flagged that the original global redirects could unintentionally affect future frontend authentication.
+- **Verified**: Re-ran the full Phase A manual test suite — all admin login/logout/redirect behaviors unchanged.
