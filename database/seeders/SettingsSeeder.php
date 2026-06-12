@@ -1,0 +1,38 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Setting;
+use Illuminate\Database\Seeder;
+
+class SettingsSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $colors = [
+            'primary_color' => '#0d6efd',
+            'secondary_color' => '#6c757d',
+            'accent_color' => '#fd7e14',
+            'header_background' => '#ffffff',
+            'footer_background' => '#212529',
+            'button_color' => '#0d6efd',
+            'button_hover_color' => '#0b5ed7',
+            'text_color' => '#212529',
+            'link_color' => '#0d6efd',
+        ];
+
+        foreach ($colors as $key => $value) {
+            Setting::updateOrCreate(
+                ['group' => 'theme', 'key' => $key],
+                ['value' => $value, 'type' => 'color']
+            );
+        }
+
+        foreach (['logo', 'favicon'] as $key) {
+            Setting::updateOrCreate(
+                ['group' => 'theme', 'key' => $key],
+                ['value' => null, 'media_id' => null, 'type' => 'media']
+            );
+        }
+    }
+}

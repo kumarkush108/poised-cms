@@ -19,12 +19,16 @@ This is a Laravel 12 corporate website for Poised Technology with a public marke
 
 ## In-progress modules
 
-CMS transformation (Phases A-J per approved roadmap). Phase A complete; Phase B (CMS Core Database Schema) is next, pending review.
+CMS transformation (Phases A-J per approved roadmap). Phase A complete. Phase B (CMS Core Database Schema) complete; Phase C (Media Library) is next, pending review.
 
 ## Pending modules
 
 - **Real forgot-password flow**: token generation, reset email (mail is currently `log` driver), and a reset-password form/route.
-- **CMS data model for public content**: pages, services, and solutions are static Blade content; no `pages`, `services`, or `solutions` tables/models/migrations exist. Building "Home CMS", "About CMS", "Services CMS", "Solutions CMS" (as implied by the admin sidebar) requires creating these from scratch.
+- **CMS admin UI**: `pages`/`page_sections`/`section_fields`/`section_items`/`item_fields` schema now exists (Phase B), but there is no admin controller/UI yet to edit them — "Home CMS", "About CMS", "Solutions CMS", "Services CMS" sidebar links are still dead.
+- **Frontend conversion**: Blade partials still render hardcoded markup; Phase I will rewire `partials/sections/*` to read from `page_sections`/`section_fields`/`section_items`/`item_fields`.
+- **Media Library (Phase C)**: `media` table/model exist (schema only); no upload UI, storage handling, or media picker yet.
+- **Menu management (deferred CRUD)**: `menus`/`menu_items` schema and seed data exist; no admin CRUD yet.
+- **Theme settings UI**: `settings` table seeded with 11 `theme`-group rows; no admin form to edit them yet.
 - **Contact message storage**: the public contact/appointment forms have no backend route/controller; the admin sidebar references "Contact Messages" but no `messages` table or model exists.
 - **Dashboard real metrics**: replace hardcoded counts (12 pages / 8 services / 6 solutions / 24 messages) with real queries once the above models exist.
 - **API routes**: `routes/api.php` does not exist; no API layer is configured.
@@ -48,11 +52,12 @@ CMS transformation (Phases A-J per approved roadmap). Phase A complete; Phase B 
 
 ## Recommended next priorities
 
-1. Phase B — CMS Core Database Schema: create `pages`, `page_sections`, `section_items`, `cache_versions` migrations/models and the Template Registry skeleton.
-2. Decide on and create the CMS data model (migrations + models) for `services`, `solutions`, and `contact_messages` before building out the corresponding admin sidebar sections.
-3. Wire the public contact/appointment forms to a real controller that persists submissions (depends on `contact_messages` table, Phase H).
-4. Replace hardcoded dashboard metrics with real counts once the above models exist.
-5. Expand test coverage to cover admin auth flows (now in place) and any new CMS controllers as they're built.
+1. Phase C — Media Library: build upload handling, storage, and a media picker UI on top of the `media` table created in Phase B.
+2. Build admin CRUD for `pages`/`page_sections`/`section_fields`/`section_items`/`item_fields` (Phase F), using `App\Cms\TemplateRegistry` to drive forms.
+3. Decide on and create the CMS data model (migrations + models) for `contact_messages` before building out that admin sidebar section (Phase H).
+4. Wire the public contact/appointment forms to a real controller that persists submissions (depends on `contact_messages` table, Phase H).
+5. Replace hardcoded dashboard metrics with real counts once the above models exist.
+6. Expand test coverage to cover admin auth flows (now in place) and any new CMS controllers as they're built.
 
 ## Change Log
 
@@ -69,3 +74,15 @@ CMS transformation (Phases A-J per approved roadmap). Phase A complete; Phase B 
 - **Files modified**: `bootstrap/app.php`.
 - **Why**: Reviewer flagged that the original global redirects could unintentionally affect future frontend authentication.
 - **Verified**: Re-ran the full Phase A manual test suite — all admin login/logout/redirect behaviors unchanged.
+
+### 2026-06-12 — Phase B: CMS Core Database Schema
+
+- **What changed**: Implemented the field-based CMS schema approved after design review. Created 10 new tables: `media`, `pages`, `page_sections`, `section_fields`, `section_items`, `item_fields`, `menus`, `menu_items`, `settings`, `cache_versions`. `page_sections`/`section_items` are purely structural (page/section/order/active); all content lives in `section_fields`/`item_fields` as `field_key` → `value`/`media_id` rows, with the field set per `section_key`/`item_type` declared in `config/cms/templates.php` (the Template Registry, exposed via `App\Cms\TemplateRegistry`). Added 10 Eloquent models with relationships. Registered the registry config via `AppServiceProvider::register()` (`mergeConfigFrom`). Seeded: 11 `theme`-group `settings` rows (colors + logo/favicon); the 5 existing public pages (`home`, `about`, `services`, `solutions`, `contact`) as `is_system=true` rows with their `page_sections` populated per their template's `allowed_sections` (no field content yet — Blade views unchanged); `header`/`footer` `menus` each with 5 `menu_items` linking to the 5 pages. `Page` model guards (`static::deleting`/`static::updating`) prevent deleting `is_system` pages and prevent changing `slug`/`template` on `is_system` pages or after creation on any page.
+- **Files created**: 10 migrations (`database/migrations/2026_06_12_1000{00..09}_*.php`), 10 models (`app/Models/{Media,Page,PageSection,SectionField,SectionItem,ItemField,Menu,MenuItem,Setting,CacheVersion}.php`), `config/cms/templates.php`, `app/Cms/TemplateRegistry.php`, `database/seeders/{SettingsSeeder,PagesSeeder,MenusSeeder}.php`.
+- **Files modified**: `app/Providers/AppServiceProvider.php` (merge `config/cms/templates.php`), `database/seeders/DatabaseSeeder.php` (call new seeders).
+- **Database changes**: 10 new tables (see above); existing tables untouched.
+- **Routes**: none added/changed.
+- **Packages**: none added.
+- **Why**: Phase B of the approved CMS roadmap — establishes a schema that supports new section/item types via Template Registry config entries alone, with no future migrations.
+- **Verified**: `php artisan migrate` ran clean (all 10 new tables created); seeders produced 11 settings rows, 5 pages with correct templates and section counts (home=8, about=3, services=4, solutions=5, contact=3), 2 menus with 5 items each; tinker test confirmed `is_system` page delete and slug/template change both throw `RuntimeException`; `php artisan serve` smoke test confirmed `/`, `/about`, `/admin/login` all return 200 — no regression to existing routes/views.
+- **Rollback**: `php artisan migrate:rollback --step=10` (drops the 10 new tables in reverse order); delete the 10 migration files, 10 model files, `config/cms/templates.php`, `app/Cms/TemplateRegistry.php`, 3 seeder files; revert `AppServiceProvider.php` and `DatabaseSeeder.php`.

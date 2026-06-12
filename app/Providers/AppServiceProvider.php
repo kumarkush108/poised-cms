@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->mergeConfigFrom(config_path('cms/templates.php'), 'cms.templates');
     }
 
     /**
