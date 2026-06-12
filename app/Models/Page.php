@@ -41,6 +41,12 @@ class Page extends Model
             }
         });
 
+        static::forceDeleting(function (Page $page) {
+            if ($page->is_system) {
+                throw new \RuntimeException('System pages cannot be force-deleted.');
+            }
+        });
+
         static::updating(function (Page $page) {
             if ($page->is_system && ($page->isDirty('slug') || $page->isDirty('template'))) {
                 throw new \RuntimeException('The slug and template of a system page cannot be changed.');

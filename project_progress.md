@@ -86,3 +86,15 @@ CMS transformation (Phases A-J per approved roadmap). Phase A complete. Phase B 
 - **Why**: Phase B of the approved CMS roadmap — establishes a schema that supports new section/item types via Template Registry config entries alone, with no future migrations.
 - **Verified**: `php artisan migrate` ran clean (all 10 new tables created); seeders produced 11 settings rows, 5 pages with correct templates and section counts (home=8, about=3, services=4, solutions=5, contact=3), 2 menus with 5 items each; tinker test confirmed `is_system` page delete and slug/template change both throw `RuntimeException`; `php artisan serve` smoke test confirmed `/`, `/about`, `/admin/login` all return 200 — no regression to existing routes/views.
 - **Rollback**: `php artisan migrate:rollback --step=10` (drops the 10 new tables in reverse order); delete the 10 migration files, 10 model files, `config/cms/templates.php`, `app/Cms/TemplateRegistry.php`, 3 seeder files; revert `AppServiceProvider.php` and `DatabaseSeeder.php`.
+
+### 2026-06-12 — Phase B hardening: close `forceDelete()` bypass on system pages
+
+- **What changed**: A post-review audit found that `App\Models\Page`'s `is_system` protection guards (`deleting`/`updating`) did not cover Laravel's separate `forceDeleting` lifecycle event, so `->forceDelete()` could hard-delete an `is_system` page without triggering any guard. Added a `static::forceDeleting()` listener in `Page::boot()` that throws `\RuntimeException('System pages cannot be force-deleted.')` for `is_system` pages, mirroring the existing `deleting` guard. Also enabled the in-memory SQLite testing database (`phpunit.xml`, previously commented out) so the test suite no longer points at the real MySQL dev database (`poised_cms`), and added `tests/Unit/PageSystemProtectionTest.php` covering all `Page` model protection rules: system-page delete/force-delete/slug-change/template-change all throw; non-system page slug/template changes after creation throw; non-system page soft-delete, force-delete, and other-field updates succeed normally.
+- **Files modified**: `app/Models/Page.php`, `phpunit.xml`.
+- **Files created**: `tests/Unit/PageSystemProtectionTest.php`.
+- **Database changes**: none.
+- **Routes**: none added/changed.
+- **Packages**: none added.
+- **Why**: closes a protection gap identified during the Phase B architecture review before formal close-out, per explicit request not to defer it to Phase F.
+- **Verified**: `php artisan test` — 11 passed (18 assertions), including all 9 new `PageSystemProtectionTest` cases and the 2 pre-existing example tests.
+- **Rollback**: revert `app/Models/Page.php` (remove the `forceDeleting` listener), revert `phpunit.xml` (re-comment the `DB_CONNECTION`/`DB_DATABASE` testing env lines), delete `tests/Unit/PageSystemProtectionTest.php`.
