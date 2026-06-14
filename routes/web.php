@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\SettingController;
 
 Route::get('/', function () {
     return view('pages.home');
@@ -63,6 +65,24 @@ Route::prefix('admin')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('admin.logout');
+
+        Route::get('/media', [MediaController::class, 'index'])
+            ->name('admin.media.index');
+
+        Route::post('/media', [MediaController::class, 'store'])
+            ->name('admin.media.store');
+
+        Route::patch('/media/{media}', [MediaController::class, 'update'])
+            ->name('admin.media.update');
+
+        Route::delete('/media/{media}', [MediaController::class, 'destroy'])
+            ->name('admin.media.destroy');
+
+        Route::get('/settings', [SettingController::class, 'index'])
+            ->name('admin.settings.index');
+
+        Route::patch('/settings', [SettingController::class, 'update'])
+            ->name('admin.settings.update');
 
     });
 

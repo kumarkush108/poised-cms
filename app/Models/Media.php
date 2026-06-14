@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
@@ -18,4 +19,13 @@ class Media extends Model
         'alt_text',
         'title',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::forceDeleting(function (Media $media) {
+            Storage::disk($media->disk)->delete($media->path);
+        });
+    }
 }

@@ -25,6 +25,26 @@
             <span class="nav-text">Dashboard</span>
         </a>
 
+        <a class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}"
+            href="{{ route('admin.media.index') }}">
+
+            <span class="nav-icon">
+                <i class="bi bi-images"></i>
+            </span>
+
+            <span class="nav-text">Media Library</span>
+        </a>
+
+        <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
+            href="{{ route('admin.settings.index') }}">
+
+            <span class="nav-icon">
+                <i class="bi bi-palette"></i>
+            </span>
+
+            <span class="nav-text">Theme Settings</span>
+        </a>
+
         <a class="nav-link" href="#">
             <span class="nav-icon">
                 <i class="bi bi-house"></i>
