@@ -45,36 +45,14 @@
             <span class="nav-text">Theme Settings</span>
         </a>
 
-        <a class="nav-link" href="#">
+        <a class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}"
+            href="{{ route('admin.pages.index') }}">
+
             <span class="nav-icon">
-                <i class="bi bi-house"></i>
+                <i class="bi bi-file-earmark-text"></i>
             </span>
 
-            <span class="nav-text">Home CMS</span>
-        </a>
-
-        <a class="nav-link" href="#">
-            <span class="nav-icon">
-                <i class="bi bi-info-circle"></i>
-            </span>
-
-            <span class="nav-text">About CMS</span>
-        </a>
-
-        <a class="nav-link" href="#">
-            <span class="nav-icon">
-                <i class="bi bi-box"></i>
-            </span>
-
-            <span class="nav-text">Solutions CMS</span>
-        </a>
-
-        <a class="nav-link" href="#">
-            <span class="nav-icon">
-                <i class="bi bi-briefcase"></i>
-            </span>
-
-            <span class="nav-text">Services CMS</span>
+            <span class="nav-text">Pages</span>
         </a>
 
         <a class="nav-link" href="#">

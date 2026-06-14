@@ -19,24 +19,25 @@ This is a Laravel 12 corporate website for Poised Technology with a public marke
 
 ## In-progress modules
 
-CMS transformation (Phases A-J per approved roadmap). Phase A complete. Phase B (CMS Core Database Schema) complete. Phase C (Media Library) complete. Phase D (Theme Settings) complete, pending review; Phase F is next.
+CMS transformation (Phases A-J per approved roadmap). Phase A complete. Phase B (CMS Core Database Schema) complete. Phase C (Media Library) complete. Phase D (Theme Settings) complete. Phase F (Page & Section CRUD) complete, pending review.
 
 ## Pending modules
 
 - **Real forgot-password flow**: token generation, reset email (mail is currently `log` driver), and a reset-password form/route.
-- **CMS admin UI**: `pages`/`page_sections`/`section_fields`/`section_items`/`item_fields` schema now exists (Phase B), but there is no admin controller/UI yet to edit them — "Home CMS", "About CMS", "Solutions CMS", "Services CMS" sidebar links are still dead.
-- **Frontend conversion**: Blade partials still render hardcoded markup; Phase I will rewire `partials/sections/*` to read from `page_sections`/`section_fields`/`section_items`/`item_fields`.
-- **Media Library (Phase C)**: upload UI, storage handling, and admin list/edit/delete are complete (see Change Log). A reusable media picker (for use in Phase F/I content editors) is not yet built.
+- **Frontend conversion (Phase I)**: Blade partials still render hardcoded markup; `section_fields`/`section_items`/`item_fields` can now be populated via the Phase F admin UI, but `partials/sections/*` do not yet read from the database.
+- **Media Library (Phase C)**: upload UI, storage handling, and admin list/edit/delete are complete (see Change Log).
 - **Menu management (deferred CRUD)**: `menus`/`menu_items` schema and seed data exist; no admin CRUD yet.
-- **Theme settings UI**: complete (see Change Log, Phase D) — admin form edits the 9 seeded color rows and logo/favicon media references. No public-facing consumption of these values yet (deferred to Phase I).
+- **Theme settings UI**: complete (see Change Log, Phase D). No public-facing consumption of these values yet (deferred to Phase I).
 - **Contact message storage**: the public contact/appointment forms have no backend route/controller; the admin sidebar references "Contact Messages" but no `messages` table or model exists.
 - **Dashboard real metrics**: replace hardcoded counts (12 pages / 8 services / 6 solutions / 24 messages) with real queries once the above models exist.
 - **API routes**: `routes/api.php` does not exist; no API layer is configured.
+- **New page creation, section add/remove, drag-and-drop ordering**: explicitly out of scope for Phase F (see Phase F Change Log); deferred to a later phase if needed.
 
 ## Known bugs/issues
 
 - Forgot-password submission always returns a generic success message regardless of whether the email exists.
-- Admin sidebar contains dead links ("Home CMS", "About CMS", "Solutions CMS", "Services CMS", "Contact Messages") with no backing routes.
+- Admin sidebar still contains one dead link ("Contact Messages") with no backing route.
+- Pre-existing: the `admin.password.email` closure in `routes/web.php` type-hints `Request $request` without an import for `Illuminate\Http\Request` (latent bug, not exercised by any test — predates Phase F).
 
 ## Technical debt
 
@@ -52,9 +53,10 @@ CMS transformation (Phases A-J per approved roadmap). Phase A complete. Phase B 
 
 ## Recommended next priorities
 
-1. Build admin CRUD for `pages`/`page_sections`/`section_fields`/`section_items`/`item_fields` (Phase F), using `App\Cms\TemplateRegistry` to drive forms — including a reusable media picker built on top of Phase C's Media Library (the picker was deliberately deferred from Phase D, which used a simple image dropdown for its 2-field use case).
-3. Decide on and create the CMS data model (migrations + models) for `contact_messages` before building out that admin sidebar section (Phase H).
-4. Wire the public contact/appointment forms to a real controller that persists submissions (depends on `contact_messages` table, Phase H).
+1. Commit the currently-uncommitted Phase C, D, and F work (see Change Log) as separate commits, matching the existing one-commit-per-phase convention.
+2. Decide on and create the CMS data model (migrations + models) for `contact_messages` before building out that admin sidebar section (Phase H).
+3. Wire the public contact/appointment forms to a real controller that persists submissions (depends on `contact_messages` table, Phase H).
+4. Phase I: rewire `partials/sections/*` to read from `page_sections`/`section_fields`/`section_items`/`item_fields` (now populatable via Phase F) and consume `settings` (theme colors/logo/favicon) on the public layout.
 5. Replace hardcoded dashboard metrics with real counts once the above models exist.
 6. Expand test coverage to cover admin auth flows (now in place) and any new CMS controllers as they're built.
 
@@ -124,3 +126,22 @@ CMS transformation (Phases A-J per approved roadmap). Phase A complete. Phase B 
 - **Why**: Phase D of the approved CMS roadmap (revised scope per architecture review) — provides the first real consumer of `media_id` (via `Setting::media()`) ahead of Phase F, using the smallest viable UI.
 - **Verified**: `php artisan test` — 25 passed (54 assertions), including the new 7-test `SettingsTest` (guest redirect, view settings, update colors, reject invalid hex, set logo to existing image media, reject non-existent media id, reject non-image media for favicon) and all pre-existing tests (Phase B hardening, Phase C Media Library, example tests) still pass. `php artisan route:list --name=admin.settings` confirms both routes registered with no name collisions.
 - **Rollback**: delete `app/Http/Controllers/Admin/SettingController.php`, `resources/views/admin/settings/index.blade.php`, `tests/Feature/Admin/SettingsTest.php`; revert `routes/web.php` (remove the 2 `admin.settings.*` routes and the `SettingController` import); revert `resources/views/admin/partials/sidebar.blade.php` (remove the "Theme Settings" link). No migration to roll back, no model changes to revert (`Setting::media()` predates this phase).
+
+### 2026-06-14 — Phase F: Page & Section CRUD via TemplateRegistry
+
+- **What changed**: Built the admin "Pages" module on top of the Phase B field-based schema (`pages`, `page_sections`, `section_fields`, `section_items`, `item_fields`) and `App\Cms\TemplateRegistry`, per the approved Phase F architecture review (APPROVE WITH CHANGES). Scope covers the 5 existing system pages only:
+  - `Admin\PageController` — `index` (lists the 5 pages with template label/status/section count), `edit` (loads a page with its sections, section fields, items, and item fields), `update` (edits page metadata: title, meta_title/description/keywords, canonical_url, robots, og_title/description/og_image_id, status, published_at). `slug` and `template` are displayed read-only and excluded from the update payload — `Page`'s existing `updating` guards remain untouched and untriggered.
+  - `Admin\PageSectionController` — `update` validates and `updateOrCreate`s `section_fields` rows (keyed by `page_section_id` + `field_key`) from `TemplateRegistry::sectionFields($section->section_key)`, plus toggles `page_sections.is_active`. Unknown/unregistered `section_key`s degrade gracefully: `sectionFields()`/`itemSchema()` return `[]`/`null`, so the form renders a "not defined in the Template Registry" notice and only `is_active` is updated.
+  - `Admin\SectionItemController` — `store` (add a new `section_items` row + `item_fields`, `item_type` and field schema from `TemplateRegistry::itemSchema()`, `order_column` = current max + 1), `update` (edit `item_fields` + `is_active` via `updateOrCreate`), `destroy` (soft delete via `SectionItem::delete()`), `move` (swap `order_column` with the previous/next sibling for up/down reordering — no drag-and-drop).
+  - `App\Http\Controllers\Admin\Concerns\HandlesTemplateFields` (new trait, shared by `PageSectionController`/`SectionItemController`) — builds per-field validation rules from a `TemplateRegistry` field schema (`string`→`max:255`, `text`/`richtext`→`string`, `url`→`url|max:255`, `integer`→`integer`, `media`→`exists:media,id`, honoring each field's `required` flag), normalizes empty-string media `<select>` values to `null` before validation (otherwise `exists` fails on `""` even with `nullable`), and persists validated `fields.*` input via `updateOrCreate(['field_key' => ...], [...])` onto a `PageSection`/`SectionItem`'s `fields()` relation.
+  - Views: `admin/pages/index.blade.php` (page list), `admin/pages/edit.blade.php` (page-meta form + one form per section for its fields/active toggle + per-item edit/move/delete forms + an "add item" form per section with an item schema), `admin/pages/partials/field-input.blade.php` (renders one field as text/textarea/number/url/media-select based on `TemplateRegistry` type), `resources/views/admin/partials/media-select.blade.php` (new shared, generic `<select>` of all `Media` rows — reused for `og_image_id` and any `media`-type section/item field; Phase D's settings dropdown was left as-is).
+  - Sidebar: replaced the 4 dead "Home/About/Solutions/Services CMS" links in `admin/partials/sidebar.blade.php` with a single "Pages" link to `admin.pages.index`. "Contact Messages" remains a dead link (Phase H).
+- **Files created**: `app/Http/Controllers/Admin/PageController.php`, `app/Http/Controllers/Admin/PageSectionController.php`, `app/Http/Controllers/Admin/SectionItemController.php`, `app/Http/Controllers/Admin/Concerns/HandlesTemplateFields.php`, `resources/views/admin/pages/index.blade.php`, `resources/views/admin/pages/edit.blade.php`, `resources/views/admin/pages/partials/field-input.blade.php`, `resources/views/admin/partials/media-select.blade.php`, `tests/Feature/Admin/PageManagementTest.php`.
+- **Files modified**: `routes/web.php` (8 new routes + 3 new controller imports), `resources/views/admin/partials/sidebar.blade.php` (replaced 4 dead links with "Pages").
+- **Database changes**: none — reused the Phase B `pages`/`page_sections`/`section_fields`/`section_items`/`item_fields` tables and models as-is.
+- **Routes** (all under `auth` middleware, prefix `admin`): `admin.pages.index` (GET `/admin/pages`), `admin.pages.edit` (GET `/admin/pages/{page}`), `admin.pages.update` (PATCH), `admin.page-sections.update` (PATCH `/admin/page-sections/{section}`), `admin.section-items.store` (POST `/admin/page-sections/{section}/items`), `admin.section-items.update` (PATCH `/admin/section-items/{item}`), `admin.section-items.destroy` (DELETE), `admin.section-items.move` (POST `/admin/section-items/{item}/move`).
+- **Validation**: page metadata uses inline `$request->validate([...])` (status restricted to `draft`/`published`; `canonical_url`/`og_image_id` etc. follow existing conventions). Section/item fields are validated dynamically per `TemplateRegistry` field type/required flag via `HandlesTemplateFields::templateFieldRules()` — e.g. `hero.heading` and `cta.heading` are `required`, `ev_solutions`/`testimonials`/etc. item fields enforce their own `required` flags (e.g. `solution-card.title`, `testimonial.author`/`quote`).
+- **Packages**: none added.
+- **Why**: Phase F of the approved CMS roadmap, implemented per the prior architecture review's "APPROVE WITH CHANGES" recommendation — gives admins real content-editing for the 5 system pages while keeping the smallest production-safe scope (no new-page creation, no section add/remove, no drag-and-drop, no frontend rendering changes).
+- **Verified**: `php artisan test` — 40 passed (107 assertions), including the new 15-test `PageManagementTest` (guest redirect; pages index; page edit view; page metadata update incl. status validation and OG image assignment; section field update incl. required-field validation, media field assignment, and rejection of an unknown media id; graceful handling of an unregistered `section_key`; full item add/update/remove lifecycle; item `required`-field validation; item move-up reordering including the first-item no-op case) and all 25 pre-existing tests (Phase B hardening, Phase C Media Library, Phase D Settings, examples) still pass.
+- **Rollback**: delete `app/Http/Controllers/Admin/{Page,PageSection,SectionItem}Controller.php`, `app/Http/Controllers/Admin/Concerns/HandlesTemplateFields.php`, `resources/views/admin/pages/`, `resources/views/admin/partials/media-select.blade.php`, `tests/Feature/Admin/PageManagementTest.php`; revert `routes/web.php` (remove the 8 `admin.pages.*`/`admin.page-sections.*`/`admin.section-items.*` routes and the 3 new controller imports); revert `resources/views/admin/partials/sidebar.blade.php` (restore the 4 dead CMS links in place of "Pages"). No migration to roll back, no model changes to revert.

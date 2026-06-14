@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\PageSectionController;
+use App\Http\Controllers\Admin\SectionItemController;
 use App\Http\Controllers\Admin\SettingController;
 
 Route::get('/', function () {
@@ -83,6 +86,30 @@ Route::prefix('admin')->group(function () {
 
         Route::patch('/settings', [SettingController::class, 'update'])
             ->name('admin.settings.update');
+
+        Route::get('/pages', [PageController::class, 'index'])
+            ->name('admin.pages.index');
+
+        Route::get('/pages/{page}', [PageController::class, 'edit'])
+            ->name('admin.pages.edit');
+
+        Route::patch('/pages/{page}', [PageController::class, 'update'])
+            ->name('admin.pages.update');
+
+        Route::patch('/page-sections/{section}', [PageSectionController::class, 'update'])
+            ->name('admin.page-sections.update');
+
+        Route::post('/page-sections/{section}/items', [SectionItemController::class, 'store'])
+            ->name('admin.section-items.store');
+
+        Route::patch('/section-items/{item}', [SectionItemController::class, 'update'])
+            ->name('admin.section-items.update');
+
+        Route::delete('/section-items/{item}', [SectionItemController::class, 'destroy'])
+            ->name('admin.section-items.destroy');
+
+        Route::post('/section-items/{item}/move', [SectionItemController::class, 'move'])
+            ->name('admin.section-items.move');
 
     });
 
