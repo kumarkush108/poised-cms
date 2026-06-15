@@ -8,15 +8,23 @@
 
 @section('content')
 
+    @php
+        use App\Cms\Content;
+
+        $heroSection = $sections['hero'] ?? null;
+        $heroHeading = Content::field($heroSection, 'heading', 'About Us');
+        $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-1.png'));
+    @endphp
+
     <!-- Page Header Start -->
     <div class="container-fluid page-header py-5 mb-5 wow fadeIn"
         style="background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)),
-        url('{{ asset('assets/img/carousel-1.png') }}') center center no-repeat;
+        url('{{ $heroBg }}') center center no-repeat;
         background-size: cover;">
 
         <div class="container text-center py-5 mt-4">
             <h1 class="display-2 text-white mb-3 animated slideInDown">
-                About Us
+                {{ $heroHeading }}
             </h1>
 
             <nav aria-label="breadcrumb animated slideInDown">
@@ -26,7 +34,7 @@
                     </li>
 
                     <li class="breadcrumb-item text-primary active" aria-current="page">
-                        About Us
+                        {{ $heroHeading }}
                     </li>
                 </ol>
             </nav>
@@ -70,51 +78,38 @@
                         Who We Are
                     </h5>
 
+                    @php
+                        $contentSection = $sections['content'] ?? null;
+                        $contentHeading = Content::field($contentSection, 'heading', 'Building Smart Technology & EV Infrastructure for the Future');
+                        $contentBody = Content::field($contentSection, 'body', '<p class="mb-4"><strong>Poised Technology</strong> is a future-focused technology company delivering innovative digital solutions, scalable software systems and intelligent EV charging infrastructure.</p><p class="mb-4">We help startups, enterprises and mobility businesses accelerate transformation through software engineering, cloud platforms, automation and smart energy ecosystems.</p><p class="mb-4">Our mission is to combine innovation, performance and reliability to create impactful technology solutions that drive real-world growth.</p>');
+
+                        $checklistSection = $sections['checklist'] ?? null;
+                        $checklistItems = Content::items($checklistSection, [
+                            ['text' => 'Innovation Driven', 'description' => 'Modern scalable technology solutions', 'icon' => 'bi-check-circle-fill'],
+                            ['text' => 'EV Ecosystem', 'description' => 'End-to-end EV infrastructure expertise', 'icon' => 'bi-check-circle-fill'],
+                        ]);
+                    @endphp
+
                     <h1 class="display-5 mb-4">
-                        Building Smart Technology &
-                        EV Infrastructure for the Future
+                        {{ $contentHeading }}
                     </h1>
 
-                    <p class="mb-4">
-                        <strong>Poised Technology</strong> is a future-focused
-                        technology company delivering innovative digital solutions,
-                        scalable software systems and intelligent EV charging infrastructure.
-                    </p>
-
-                    <p class="mb-4">
-                        We help startups, enterprises and mobility businesses accelerate
-                        transformation through software engineering, cloud platforms,
-                        automation and smart energy ecosystems.
-                    </p>
-
-                    <p class="mb-4">
-                        Our mission is to combine innovation, performance and reliability
-                        to create impactful technology solutions that drive real-world growth.
-                    </p>
+                    {!! Content::richtext($contentBody) !!}
 
                     <div class="row g-4 mt-2">
 
-                        <div class="col-sm-6">
-                            <div class="d-flex">
-                                <i class="bi bi-check-circle-fill text-primary fs-4 me-3"></i>
+                        @foreach ($checklistItems as $item)
+                            <div class="col-sm-6">
+                                <div class="d-flex">
+                                    <i class="bi {{ Content::itemField($item, 'icon', 'bi-check-circle-fill') }} text-primary fs-4 me-3"></i>
 
-                                <div>
-                                    <h5>Innovation Driven</h5>
-                                    <span>Modern scalable technology solutions</span>
+                                    <div>
+                                        <h5>{{ Content::itemField($item, 'text') }}</h5>
+                                        <span>{{ Content::itemField($item, 'description') }}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <div class="d-flex">
-                                <i class="bi bi-check-circle-fill text-primary fs-4 me-3"></i>
-
-                                <div>
-                                    <h5>EV Ecosystem</h5>
-                                    <span>End-to-end EV infrastructure expertise</span>
-                                </div>
-                            </div>
-                        </div>
+                        @endforeach
 
                     </div>
 
@@ -127,6 +122,16 @@
     <!-- Company Intro End -->
 
 
+    @php
+        $cardsSection = $sections['cards'] ?? null;
+        $cardsHeading = Content::field($cardsSection, 'heading', 'Our Vision & Mission');
+        $cardsSubheading = Content::field($cardsSection, 'subheading', 'Empowering businesses and communities through intelligent digital transformation and sustainable EV technology.');
+        $cards = Content::items($cardsSection, [
+            ['icon' => 'bi-eye', 'title' => 'Our Vision', 'description' => 'To become a leading global technology and EV infrastructure company driving sustainable innovation, smart mobility and digital excellence.'],
+            ['icon' => 'bi-bullseye', 'title' => 'Our Mission', 'description' => 'Deliver reliable, scalable and intelligent technology solutions that help businesses innovate faster, operate smarter and grow sustainably.'],
+        ]);
+    @endphp
+
     <!-- Vision Mission Start -->
     <div class="container-fluid py-5 bg-light">
         <div class="container">
@@ -135,57 +140,36 @@
                 style="max-width: 700px;">
 
                 <h1 class="display-5 mb-3">
-                    Our Vision & Mission
+                    {{ $cardsHeading }}
                 </h1>
 
                 <p>
-                    Empowering businesses and communities through
-                    intelligent digital transformation and sustainable EV technology.
+                    {{ $cardsSubheading }}
                 </p>
 
             </div>
 
             <div class="row g-4">
 
-                <div class="col-md-6 wow fadeInUp" data-wow-delay="0.2s">
+                @foreach ($cards as $index => $card)
+                    <div class="col-md-6 wow fadeInUp" data-wow-delay="{{ $index === 0 ? '0.2s' : '0.4s' }}">
 
-                    <div class="bg-white p-5 rounded shadow-sm h-100">
+                        <div class="bg-white p-5 rounded shadow-sm h-100">
 
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-eye text-dark"></i>
+                            <div class="icon-box-primary mb-4">
+                                <i class="bi {{ Content::itemField($card, 'icon', 'bi-eye') }} text-dark"></i>
+                            </div>
+
+                            <h3 class="mb-3">{{ Content::itemField($card, 'title') }}</h3>
+
+                            <p class="mb-0">
+                                {{ Content::itemField($card, 'description') }}
+                            </p>
+
                         </div>
 
-                        <h3 class="mb-3">Our Vision</h3>
-
-                        <p class="mb-0">
-                            To become a leading global technology and EV infrastructure
-                            company driving sustainable innovation, smart mobility
-                            and digital excellence.
-                        </p>
-
                     </div>
-
-                </div>
-
-                <div class="col-md-6 wow fadeInUp" data-wow-delay="0.4s">
-
-                    <div class="bg-white p-5 rounded shadow-sm h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-bullseye text-dark"></i>
-                        </div>
-
-                        <h3 class="mb-3">Our Mission</h3>
-
-                        <p class="mb-0">
-                            Deliver reliable, scalable and intelligent technology
-                            solutions that help businesses innovate faster,
-                            operate smarter and grow sustainably.
-                        </p>
-
-                    </div>
-
-                </div>
+                @endforeach
 
             </div>
 
@@ -264,6 +248,16 @@
     <!-- EV Section End -->
 
 
+    @php
+        $statsSection = $sections['stats'] ?? null;
+        $stats = Content::items($statsSection, [
+            ['label' => 'Projects Delivered', 'value' => '100'],
+            ['label' => 'Enterprise Clients', 'value' => '50'],
+            ['label' => 'Technology Experts', 'value' => '25'],
+            ['label' => 'System Reliability', 'value' => '99'],
+        ]);
+    @endphp
+
     <!-- Counter Section Start -->
     <div class="container-fluid bg-primary py-5">
 
@@ -271,25 +265,12 @@
 
             <div class="row text-center text-white g-4">
 
-                <div class="col-md-3 col-6 wow fadeInUp">
-                    <h1 class="text-white" data-toggle="counter-up">100</h1>
-                    <p class="mb-0">Projects Delivered</p>
-                </div>
-
-                <div class="col-md-3 col-6 wow fadeInUp">
-                    <h1 class="text-white" data-toggle="counter-up">50</h1>
-                    <p class="mb-0">Enterprise Clients</p>
-                </div>
-
-                <div class="col-md-3 col-6 wow fadeInUp">
-                    <h1 class="text-white" data-toggle="counter-up">25</h1>
-                    <p class="mb-0">Technology Experts</p>
-                </div>
-
-                <div class="col-md-3 col-6 wow fadeInUp">
-                    <h1 class="text-white" data-toggle="counter-up">99</h1>
-                    <p class="mb-0">System Reliability</p>
-                </div>
+                @foreach ($stats as $stat)
+                    <div class="col-md-3 col-6 wow fadeInUp">
+                        <h1 class="text-white" data-toggle="counter-up">{{ Content::itemField($stat, 'value') }}</h1>
+                        <p class="mb-0">{{ Content::itemField($stat, 'label') }}</p>
+                    </div>
+                @endforeach
 
             </div>
 
@@ -298,6 +279,17 @@
     </div>
     <!-- Counter Section End -->
 
+
+    @php
+        $featuresSection = $sections['features'] ?? null;
+        $featuresHeading = Content::field($featuresSection, 'heading', 'Why Choose Poised Technology');
+        $featuresSubheading = Content::field($featuresSection, 'subheading', 'Combining technology expertise, innovation and execution excellence to deliver measurable business impact.');
+        $features = Content::items($featuresSection, [
+            ['icon' => 'bi-code-slash', 'title' => 'Custom Engineering', 'description' => 'Tailored software and digital platforms built for scalability and performance.'],
+            ['icon' => 'bi-lightning-charge', 'title' => 'EV Innovation', 'description' => 'Smart EV charging infrastructure designed for future mobility ecosystems.'],
+            ['icon' => 'bi-headset', 'title' => 'Reliable Support', 'description' => 'Dedicated support and maintenance ensuring smooth business operations.'],
+        ]);
+    @endphp
 
     <!-- Why Choose Us Start -->
     <div class="container-fluid py-5">
@@ -308,71 +300,36 @@
                 style="max-width: 700px;">
 
                 <h1 class="display-5 mb-3">
-                    Why Choose Poised Technology
+                    {{ $featuresHeading }}
                 </h1>
 
                 <p>
-                    Combining technology expertise, innovation and execution
-                    excellence to deliver measurable business impact.
+                    {{ $featuresSubheading }}
                 </p>
 
             </div>
 
             <div class="row g-4">
 
-                <div class="col-lg-4 col-md-6 wow fadeInUp">
+                @foreach ($features as $feature)
+                    <div class="col-lg-4 col-md-6 wow fadeInUp">
 
-                    <div class="feature-item border rounded p-5 h-100">
+                        <div class="feature-item border rounded p-5 h-100">
 
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-code-slash text-dark"></i>
+                            <div class="icon-box-primary mb-4">
+                                <i class="bi {{ Content::itemField($feature, 'icon', 'bi-code-slash') }} text-dark"></i>
+                            </div>
+
+                            <h5>{{ Content::itemField($feature, 'title') }}</h5>
+
+                            <p class="mb-0">
+                                {{ Content::itemField($feature, 'description') }}
+                            </p>
+
                         </div>
 
-                        <h5>Custom Engineering</h5>
-
-                        <p class="mb-0">
-                            Tailored software and digital platforms built for scalability and performance.
-                        </p>
-
                     </div>
-
-                </div>
-
-                <div class="col-lg-4 col-md-6 wow fadeInUp">
-
-                    <div class="feature-item border rounded p-5 h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-lightning-charge text-dark"></i>
-                        </div>
-
-                        <h5>EV Innovation</h5>
-
-                        <p class="mb-0">
-                            Smart EV charging infrastructure designed for future mobility ecosystems.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-4 col-md-6 wow fadeInUp">
-
-                    <div class="feature-item border rounded p-5 h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-headset text-dark"></i>
-                        </div>
-
-                        <h5>Reliable Support</h5>
-
-                        <p class="mb-0">
-                            Dedicated support and maintenance ensuring smooth business operations.
-                        </p>
-
-                    </div>
-
-                </div>
+                @endforeach
 
             </div>
 
@@ -382,23 +339,30 @@
     <!-- Why Choose Us End -->
 
 
+    @php
+        $ctaSection = $sections['cta'] ?? null;
+        $ctaHeading = Content::field($ctaSection, 'heading', 'Let’s Build the Future Together');
+        $ctaBody = Content::field($ctaSection, 'body', 'Partner with Poised Technology to accelerate innovation, digital transformation and EV infrastructure growth.');
+        $ctaButtonText = Content::field($ctaSection, 'button_text', 'Contact Us');
+        $ctaButtonUrl = Content::field($ctaSection, 'button_url', url('/contact'));
+    @endphp
+
     <!-- CTA Start -->
     <div class="container-fluid py-5 bg-dark text-white">
 
         <div class="container text-center wow fadeInUp">
 
             <h1 class="display-5 text-white mb-4">
-                Let’s Build the Future Together
+                {{ $ctaHeading }}
             </h1>
 
             <p class="mb-4">
-                Partner with Poised Technology to accelerate innovation,
-                digital transformation and EV infrastructure growth.
+                {{ $ctaBody }}
             </p>
 
-            <a href="{{ url('/contact') }}"
+            <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-primary py-3 px-5">
-                Contact Us
+                {{ $ctaButtonText }}
             </a>
 
         </div>

@@ -55,7 +55,9 @@
             <span class="nav-text">Pages</span>
         </a>
 
-        <a class="nav-link" href="#">
+        <a class="nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}"
+            href="{{ route('admin.contact-messages.index') }}">
+
             <span class="nav-icon">
                 <i class="bi bi-envelope"></i>
             </span>

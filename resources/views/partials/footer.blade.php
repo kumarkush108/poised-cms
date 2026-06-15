@@ -10,9 +10,13 @@
             <div class="col-lg-6 pe-lg-5">
 
                 <a href="{{ route('home') }}" class="navbar-brand">
-                    <h1 class="h1 text-primary mb-0">
-                        Poised<span class="text-white"></span>
-                    </h1>
+                    @if ($logoUrl = \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'logo'))
+                        <img src="{{ $logoUrl }}" alt="Poised Technology" style="max-height: 50px;">
+                    @else
+                        <h1 class="h1 text-primary mb-0">
+                            Poised<span class="text-white"></span>
+                        </h1>
+                    @endif
                 </a>
 
                 <p class="fs-5 mb-4">

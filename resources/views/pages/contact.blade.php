@@ -8,21 +8,30 @@
 
 @section('content')
 
+    @php
+        use App\Cms\Content;
+
+        $heroSection = $sections['hero'] ?? null;
+        $heroHeading = Content::field($heroSection, 'heading', 'Contact Us');
+        $heroSubheading = Content::field($heroSection, 'subheading', 'Let’s discuss your next technology, software or EV infrastructure project.');
+        $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-3.png'));
+    @endphp
+
     <!-- Hero Start -->
     <div class="container-fluid page-header py-5 mb-5 wow fadeIn"
         style="background:
         linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)),
-        url('{{ asset('assets/img/carousel-3.png') }}') center center/cover no-repeat;"
+        url('{{ $heroBg }}') center center/cover no-repeat;"
         data-wow-delay="0.1s">
 
         <div class="container text-center py-5 mt-4">
 
             <h1 class="display-3 text-white mb-3 animated slideInDown">
-                Contact Us
+                {{ $heroHeading }}
             </h1>
 
             <p class="fs-5 text-white mb-4 animated slideInUp">
-                Let’s discuss your next technology, software or EV infrastructure project.
+                {{ $heroSubheading }}
             </p>
 
             <nav aria-label="breadcrumb">
@@ -33,7 +42,7 @@
                     </li>
 
                     <li class="breadcrumb-item text-primary active">
-                        Contact
+                        {{ $heroHeading }}
                     </li>
 
                 </ol>
@@ -43,6 +52,16 @@
     </div>
     <!-- Hero End -->
 
+
+    @php
+        $contactInfoSection = $sections['contact_info'] ?? null;
+        $contactAddress = Content::field($contactInfoSection, 'address', 'F-15, First Floor, Block D 242, Sector 63, Noida-201301');
+        $contactPhone = Content::field($contactInfoSection, 'phone', '+91 9876543210');
+        $contactPhoneSecondary = Content::field($contactInfoSection, 'phone_secondary', '+91 9876543211');
+        $contactEmail = Content::field($contactInfoSection, 'email', 'info@poisedtechnology.com');
+        $contactEmailSecondary = Content::field($contactInfoSection, 'email_secondary', 'support@poisedtechnology.com');
+        $contactMapUrl = Content::field($contactInfoSection, 'map_embed_url', 'https://www.google.com/maps?q=Noida%20Sector%2063&t=&z=13&ie=UTF8&iwloc=&output=embed');
+    @endphp
 
     <!-- Contact Info Start -->
     <div class="container-fluid py-5">
@@ -64,8 +83,7 @@
                         </h4>
 
                         <p class="mb-0">
-                            F-15, First Floor, Block D 242,
-                            Sector 63, Noida-201301
+                            {{ $contactAddress }}
                         </p>
 
                     </div>
@@ -86,11 +104,11 @@
                         </h4>
 
                         <p class="mb-2">
-                            +91 9876543210
+                            {{ $contactPhone }}
                         </p>
 
                         <p class="mb-0">
-                            +91 9876543211
+                            {{ $contactPhoneSecondary }}
                         </p>
 
                     </div>
@@ -111,11 +129,11 @@
                         </h4>
 
                         <p class="mb-2">
-                            info@poisedtechnology.com
+                            {{ $contactEmail }}
                         </p>
 
                         <p class="mb-0">
-                            support@poisedtechnology.com
+                            {{ $contactEmailSecondary }}
                         </p>
 
                     </div>
@@ -138,55 +156,45 @@
                 <!-- Left Content -->
                 <div class="col-lg-5 wow fadeInLeft" data-wow-delay="0.2s">
 
+                    @php
+                        $contentSection = $sections['content'] ?? null;
+                        $contentHeading = Content::field($contentSection, 'heading', 'Let’s Build Something Amazing Together');
+                        $contentBody = Content::field($contentSection, 'body', '<p class="mb-4">Whether you\'re looking for software development, EV charging infrastructure or digital transformation solutions, our team is ready to help.</p>');
+
+                        $cardsSection = $sections['cards'] ?? null;
+                        $infoCards = Content::items($cardsSection, [
+                            ['icon' => 'bi-clock', 'title' => 'Working Hours', 'description' => 'Monday - Saturday : 09 AM - 06 PM'],
+                            ['icon' => 'bi-headset', 'title' => 'Quick Support', 'description' => 'Dedicated support for all project inquiries.'],
+                        ]);
+                    @endphp
+
                     <h1 class="display-6 mb-4">
-                        Let’s Build Something Amazing Together
+                        {{ $contentHeading }}
                     </h1>
 
-                    <p class="mb-4">
-                        Whether you're looking for software development,
-                        EV charging infrastructure or digital transformation solutions,
-                        our team is ready to help.
-                    </p>
+                    {!! Content::richtext($contentBody) !!}
 
-                    <div class="d-flex align-items-start mb-4">
+                    @foreach ($infoCards as $index => $card)
+                        <div class="d-flex align-items-start {{ $loop->last ? '' : 'mb-4' }}">
 
-                        <div class="icon-box-primary">
-                            <i class="bi bi-clock text-dark fs-4"></i>
-                        </div>
+                            <div class="icon-box-primary">
+                                <i class="bi {{ Content::itemField($card, 'icon', 'bi-clock') }} text-dark fs-4"></i>
+                            </div>
 
-                        <div class="ms-3">
+                            <div class="ms-3">
 
-                            <h5>
-                                Working Hours
-                            </h5>
+                                <h5>
+                                    {{ Content::itemField($card, 'title') }}
+                                </h5>
 
-                            <span>
-                                Monday - Saturday : 09 AM - 06 PM
-                            </span>
+                                <span>
+                                    {{ Content::itemField($card, 'description') }}
+                                </span>
 
-                        </div>
-
-                    </div>
-
-                    <div class="d-flex align-items-start">
-
-                        <div class="icon-box-primary">
-                            <i class="bi bi-headset text-dark fs-4"></i>
-                        </div>
-
-                        <div class="ms-3">
-
-                            <h5>
-                                Quick Support
-                            </h5>
-
-                            <span>
-                                Dedicated support for all project inquiries.
-                            </span>
+                            </div>
 
                         </div>
-
-                    </div>
+                    @endforeach
 
                 </div>
 
@@ -199,7 +207,25 @@
                             Send Us a Message
                         </h2>
 
-                        <form>
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('contact.submit') }}">
+
+                            @csrf
 
                             <div class="row g-4">
 
@@ -211,6 +237,8 @@
                                         <input type="text"
                                             class="form-control"
                                             id="name"
+                                            name="name"
+                                            value="{{ old('name') }}"
                                             placeholder="Your Name">
 
                                         <label for="name">
@@ -229,6 +257,8 @@
                                         <input type="email"
                                             class="form-control"
                                             id="email"
+                                            name="email"
+                                            value="{{ old('email') }}"
                                             placeholder="Your Email">
 
                                         <label for="email">
@@ -247,6 +277,8 @@
                                         <input type="text"
                                             class="form-control"
                                             id="phone"
+                                            name="phone"
+                                            value="{{ old('phone') }}"
                                             placeholder="Phone Number">
 
                                         <label for="phone">
@@ -262,31 +294,31 @@
 
                                     <div class="form-floating">
 
-                                        <select class="form-select" id="service">
+                                        <select class="form-select" id="subject" name="subject">
 
-                                            <option selected>
+                                            <option value="Software Development" {{ old('subject') === 'Software Development' || ! old('subject') ? 'selected' : '' }}>
                                                 Software Development
                                             </option>
 
-                                            <option>
+                                            <option value="EV Charging Solutions" {{ old('subject') === 'EV Charging Solutions' ? 'selected' : '' }}>
                                                 EV Charging Solutions
                                             </option>
 
-                                            <option>
+                                            <option value="Cloud Infrastructure" {{ old('subject') === 'Cloud Infrastructure' ? 'selected' : '' }}>
                                                 Cloud Infrastructure
                                             </option>
 
-                                            <option>
+                                            <option value="Mobile App Development" {{ old('subject') === 'Mobile App Development' ? 'selected' : '' }}>
                                                 Mobile App Development
                                             </option>
 
-                                            <option>
+                                            <option value="Consulting" {{ old('subject') === 'Consulting' ? 'selected' : '' }}>
                                                 Consulting
                                             </option>
 
                                         </select>
 
-                                        <label for="service">
+                                        <label for="subject">
                                             Select Service
                                         </label>
 
@@ -302,7 +334,8 @@
                                         <textarea class="form-control"
                                             placeholder="Leave a message here"
                                             id="message"
-                                            style="height: 150px"></textarea>
+                                            name="message"
+                                            style="height: 150px">{{ old('message') }}</textarea>
 
                                         <label for="message">
                                             Your Message
@@ -343,7 +376,7 @@
     <div class="container-fluid px-0 wow fadeInUp" data-wow-delay="0.1s">
 
         <iframe
-            src="https://www.google.com/maps?q=Noida%20Sector%2063&t=&z=13&ie=UTF8&iwloc=&output=embed"
+            src="{{ $contactMapUrl }}"
             width="100%"
             height="450"
             style="border:0;"
@@ -355,6 +388,17 @@
     <!-- Map Section End -->
 
 
+    @php
+        $faqSection = $sections['faq'] ?? null;
+        $faqHeading = Content::field($faqSection, 'heading', 'Frequently Asked Questions');
+        $faqSubheading = Content::field($faqSection, 'subheading', 'Quick answers to common questions about our services and solutions.');
+        $faqItems = Content::items($faqSection, [
+            ['question' => 'What industries do you work with?', 'answer' => 'We work with startups, enterprises, EV businesses, SaaS companies and organizations across multiple industries.'],
+            ['question' => 'Do you provide custom software solutions?', 'answer' => 'Yes, we specialize in scalable custom software development tailored to your business requirements.'],
+            ['question' => 'Do you support EV charging infrastructure deployment?', 'answer' => 'Absolutely. We provide complete EV charging ecosystem solutions including hardware, software and monitoring systems.'],
+        ]);
+    @endphp
+
     <!-- FAQ Section Start -->
     <div class="container-fluid py-5">
         <div class="container">
@@ -364,109 +408,47 @@
                 data-wow-delay="0.1s">
 
                 <h1 class="display-6 mb-3">
-                    Frequently Asked Questions
+                    {{ $faqHeading }}
                 </h1>
 
                 <p>
-                    Quick answers to common questions about our services and solutions.
+                    {{ $faqSubheading }}
                 </p>
 
             </div>
 
             <div class="accordion" id="faqAccordion">
 
-                <!-- FAQ 1 -->
-                <div class="accordion-item mb-3 border-0 shadow-sm">
+                @foreach ($faqItems as $index => $faq)
+                    <div class="accordion-item {{ $loop->last ? '' : 'mb-3' }} border-0 shadow-sm">
 
-                    <h2 class="accordion-header">
+                        <h2 class="accordion-header">
 
-                        <button class="accordion-button"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#faq1">
+                            <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#faq{{ $index + 1 }}">
 
-                            What industries do you work with?
+                                {{ Content::itemField($faq, 'question') }}
 
-                        </button>
+                            </button>
 
-                    </h2>
+                        </h2>
 
-                    <div id="faq1"
-                        class="accordion-collapse collapse show"
-                        data-bs-parent="#faqAccordion">
+                        <div id="faq{{ $index + 1 }}"
+                            class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}"
+                            data-bs-parent="#faqAccordion">
 
-                        <div class="accordion-body">
+                            <div class="accordion-body">
 
-                            We work with startups, enterprises, EV businesses,
-                            SaaS companies and organizations across multiple industries.
+                                {{ Content::itemField($faq, 'answer') }}
 
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- FAQ 2 -->
-                <div class="accordion-item mb-3 border-0 shadow-sm">
-
-                    <h2 class="accordion-header">
-
-                        <button class="accordion-button collapsed"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#faq2">
-
-                            Do you provide custom software solutions?
-
-                        </button>
-
-                    </h2>
-
-                    <div id="faq2"
-                        class="accordion-collapse collapse"
-                        data-bs-parent="#faqAccordion">
-
-                        <div class="accordion-body">
-
-                            Yes, we specialize in scalable custom software development
-                            tailored to your business requirements.
+                            </div>
 
                         </div>
 
                     </div>
-
-                </div>
-
-                <!-- FAQ 3 -->
-                <div class="accordion-item border-0 shadow-sm">
-
-                    <h2 class="accordion-header">
-
-                        <button class="accordion-button collapsed"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#faq3">
-
-                            Do you support EV charging infrastructure deployment?
-
-                        </button>
-
-                    </h2>
-
-                    <div id="faq3"
-                        class="accordion-collapse collapse"
-                        data-bs-parent="#faqAccordion">
-
-                        <div class="accordion-body">
-
-                            Absolutely. We provide complete EV charging ecosystem
-                            solutions including hardware, software and monitoring systems.
-
-                        </div>
-
-                    </div>
-
-                </div>
+                @endforeach
 
             </div>
 
@@ -475,22 +457,30 @@
     <!-- FAQ Section End -->
 
 
+    @php
+        $ctaSection = $sections['cta'] ?? null;
+        $ctaHeading = Content::field($ctaSection, 'heading', 'Ready to Start Your Next Project?');
+        $ctaBody = Content::field($ctaSection, 'body', 'Connect with our team and turn your ideas into scalable digital solutions.');
+        $ctaButtonText = Content::field($ctaSection, 'button_text', 'Email Us Now');
+        $ctaButtonUrl = Content::field($ctaSection, 'button_url', 'mailto:info@poisedtechnology.com');
+    @endphp
+
     <!-- CTA Start -->
     <div class="container-fluid py-5 bg-primary">
         <div class="container text-center text-white">
 
             <h1 class="display-5 text-white mb-4 wow fadeInUp">
-                Ready to Start Your Next Project?
+                {{ $ctaHeading }}
             </h1>
 
             <p class="fs-5 mb-4 wow fadeInUp">
-                Connect with our team and turn your ideas into scalable digital solutions.
+                {{ $ctaBody }}
             </p>
 
-            <a href="mailto:info@poisedtechnology.com"
+            <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-light py-3 px-5 wow fadeInUp">
 
-                Email Us Now
+                {{ $ctaButtonText }}
 
             </a>
 

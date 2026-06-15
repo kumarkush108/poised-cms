@@ -29,7 +29,11 @@
             <a href="{{ route('home') }}"
                 class="h1 text-white mb-0">
 
-                Poised<span class="text-dark"></span>
+                @if ($logoUrl = \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'logo'))
+                    <img src="{{ $logoUrl }}" alt="Poised Technology" style="max-height: 50px;">
+                @else
+                    Poised<span class="text-dark"></span>
+                @endif
 
             </a>
 
@@ -72,9 +76,13 @@
             <a href="{{ route('home') }}"
                 class="navbar-brand d-lg-none">
 
-                <h1 class="text-primary m-0">
-                    Poised<span class="text-dark"></span>
-                </h1>
+                @if ($logoUrl = \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'logo'))
+                    <img src="{{ $logoUrl }}" alt="Poised Technology" style="max-height: 40px;">
+                @else
+                    <h1 class="text-primary m-0">
+                        Poised<span class="text-dark"></span>
+                    </h1>
+                @endif
 
             </a>
 

@@ -105,6 +105,8 @@
 
     <div class="col-md-3">
 
+        <a href="{{ route('admin.contact-messages.index') }}" class="text-decoration-none">
+
         <div class="metric-card metric-danger">
 
             <div class="metric-top">
@@ -120,10 +122,18 @@
             </div>
 
             <div class="metric-value">
-                24
+                {{ $totalMessages }}
             </div>
 
+            @if ($unreadMessages > 0)
+                <div class="metric-sub text-danger">
+                    {{ $unreadMessages }} unread
+                </div>
+            @endif
+
         </div>
+
+        </a>
 
     </div>
 

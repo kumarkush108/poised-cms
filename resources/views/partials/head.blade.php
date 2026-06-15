@@ -1,18 +1,42 @@
-<head>
+@php
+    $seoPage = $page ?? null;
+    $seoDefaultTitle = $__env->yieldContent('title', 'Poised Technology');
+    $seoDefaultDescription = $__env->yieldContent('meta_description', 'Poised Technology provides innovative IT solutions including software development, cloud infrastructure, data analytics and digital consulting.');
+    $seoDefaultKeywords = $__env->yieldContent('meta_keywords', 'IT Consulting, Software Development, Cloud Solutions, Digital Transformation');
+
+    $seoTitle = \App\Cms\Content::pageMeta($seoPage, 'meta_title', $seoDefaultTitle);
+    $seoDescription = \App\Cms\Content::pageMeta($seoPage, 'meta_description', $seoDefaultDescription);
+    $seoKeywords = \App\Cms\Content::pageMeta($seoPage, 'meta_keywords', $seoDefaultKeywords);
+    $seoRobots = \App\Cms\Content::pageMeta($seoPage, 'robots', 'index, follow');
+    $seoCanonical = \App\Cms\Content::pageMeta($seoPage, 'canonical_url', url()->current());
+    $seoOgTitle = \App\Cms\Content::pageMeta($seoPage, 'og_title', $seoTitle);
+    $seoOgDescription = \App\Cms\Content::pageMeta($seoPage, 'og_description', $seoDescription);
+    $seoOgImage = ($seoPage && $seoPage->ogImage) ? $seoPage->ogImage->url : null;
+@endphp
     <meta charset="utf-8">
 
-    <title>@yield('title', 'Poised Technology')</title>
+    <title>{{ $seoTitle }}</title>
 
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <meta name="keywords"
-        content="@yield('meta_keywords', 'IT Consulting, Software Development, Cloud Solutions, Digital Transformation')">
+    <meta name="keywords" content="{{ $seoKeywords }}">
 
-    <meta name="description"
-        content="@yield('meta_description', 'Poised Technology provides innovative IT solutions including software development, cloud infrastructure, data analytics and digital consulting.')">
+    <meta name="description" content="{{ $seoDescription }}">
+
+    <meta name="robots" content="{{ $seoRobots }}">
+
+    <link rel="canonical" href="{{ $seoCanonical }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $seoOgTitle }}">
+    <meta property="og:description" content="{{ $seoOgDescription }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    @if ($seoOgImage)
+        <meta property="og:image" content="{{ $seoOgImage }}">
+    @endif
 
     <!-- Favicon -->
-    <link href="{{ asset('assets/img/favicon.ico') }}" rel="icon">
+    <link href="{{ \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'favicon') ?? asset('assets/img/favicon.ico') }}" rel="icon">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,5 +75,7 @@
     <link rel="stylesheet"
         href="{{ asset('assets/css/style.css') }}">
 
+    <!-- CMS Theme Overrides -->
+    @include('partials.theme-style')
+
     @stack('styles')
-</head>

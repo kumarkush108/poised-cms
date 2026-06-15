@@ -28,4 +28,9 @@ class Media extends Model
             Storage::disk($media->disk)->delete($media->path);
         });
     }
+
+    public function getUrlAttribute(): string
+    {
+        return Storage::disk($this->disk)->url($this->path);
+    }
 }

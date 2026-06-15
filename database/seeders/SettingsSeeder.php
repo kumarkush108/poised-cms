@@ -19,6 +19,11 @@ class SettingsSeeder extends Seeder
             'button_hover_color' => '#0b5ed7',
             'text_color' => '#212529',
             'link_color' => '#0d6efd',
+            'success_color' => '#198754',
+            'warning_color' => '#ffc107',
+            'danger_color' => '#dc3545',
+            'dark_color' => '#212529',
+            'light_color' => '#f8f9fa',
         ];
 
         foreach ($colors as $key => $value) {

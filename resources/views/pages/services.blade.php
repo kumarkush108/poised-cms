@@ -8,21 +8,30 @@
 
 @section('content')
 
+    @php
+        use App\Cms\Content;
+
+        $heroSection = $sections['hero'] ?? null;
+        $heroHeading = Content::field($heroSection, 'heading', 'Our Services');
+        $heroSubheading = Content::field($heroSection, 'subheading', 'Delivering scalable digital solutions and next-generation EV technology services.');
+        $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-2.png'));
+    @endphp
+
     <!-- Hero Start -->
     <div class="container-fluid page-header py-5 mb-5 wow fadeIn"
         style="background:
         linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)),
-        url('{{ asset('assets/img/carousel-2.png') }}') center center/cover no-repeat;"
+        url('{{ $heroBg }}') center center/cover no-repeat;"
         data-wow-delay="0.1s">
 
         <div class="container text-center py-5 mt-4">
 
             <h1 class="display-3 text-white mb-3 animated slideInDown">
-                Our Services
+                {{ $heroHeading }}
             </h1>
 
             <p class="fs-5 text-white mb-4 animated slideInUp">
-                Delivering scalable digital solutions and next-generation EV technology services.
+                {{ $heroSubheading }}
             </p>
 
             <nav aria-label="breadcrumb">
@@ -33,7 +42,7 @@
                     </li>
 
                     <li class="breadcrumb-item text-primary active">
-                        Services
+                        {{ $heroHeading }}
                     </li>
 
                 </ol>
@@ -60,50 +69,36 @@
 
                 <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.4s">
 
+                    @php
+                        $contentSection = $sections['content'] ?? null;
+                        $contentHeading = Content::field($contentSection, 'heading', 'Smart Technology Services for Modern Businesses');
+                        $contentBody = Content::field($contentSection, 'body', '<p class="mb-4">At <strong>Poised Technology</strong>, we help businesses innovate faster with scalable software, intelligent EV infrastructure and modern digital solutions.</p><p class="mb-4">From startups to enterprises, our services are engineered to improve efficiency, accelerate growth and future-proof operations.</p>');
+
+                        $checklistSection = $sections['checklist'] ?? null;
+                        $checklistItems = Content::items($checklistSection, [
+                            ['text' => 'Enterprise Solutions', 'icon' => 'bi-check-circle-fill'],
+                            ['text' => 'Cloud Infrastructure', 'icon' => 'bi-check-circle-fill'],
+                            ['text' => 'EV Technology', 'icon' => 'bi-check-circle-fill'],
+                            ['text' => 'Automation Systems', 'icon' => 'bi-check-circle-fill'],
+                        ]);
+                    @endphp
+
                     <h1 class="display-6 mb-4">
-                        Smart Technology Services for Modern Businesses
+                        {{ $contentHeading }}
                     </h1>
 
-                    <p class="mb-4">
-                        At <strong>Poised Technology</strong>, we help businesses
-                        innovate faster with scalable software, intelligent EV infrastructure
-                        and modern digital solutions.
-                    </p>
-
-                    <p class="mb-4">
-                        From startups to enterprises, our services are engineered
-                        to improve efficiency, accelerate growth and future-proof operations.
-                    </p>
+                    {!! Content::richtext($contentBody) !!}
 
                     <div class="row g-3">
 
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                <span>Enterprise Solutions</span>
+                        @foreach ($checklistItems as $item)
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi {{ Content::itemField($item, 'icon', 'bi-check-circle-fill') }} text-primary me-3"></i>
+                                    <span>{{ Content::itemField($item, 'text') }}</span>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                <span>Cloud Infrastructure</span>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                <span>EV Technology</span>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                <span>Automation Systems</span>
-                            </div>
-                        </div>
+                        @endforeach
 
                     </div>
 
@@ -116,6 +111,21 @@
     <!-- Intro Section End -->
 
 
+    @php
+        $servicesSection = $sections['services_grid'] ?? null;
+        $servicesHeading = Content::field($servicesSection, 'heading', 'Professional Services We Offer');
+        $servicesSubheading = Content::field($servicesSection, 'subheading', 'End-to-end technology services built to support innovation, scalability and digital transformation.');
+        $services = Content::items($servicesSection, [
+            ['icon' => 'bi-ev-station', 'title' => 'EV Charging Solutions', 'description' => 'Smart EV charging infrastructure designed for residential, commercial and public mobility networks.', 'highlights' => "AC/DC Chargers\nSmart Monitoring\nEnergy Optimization"],
+            ['icon' => 'bi-code-slash', 'title' => 'Custom Software Development', 'description' => 'High-performance web and enterprise software tailored for modern business operations.', 'highlights' => "Laravel Development\nCRM/ERP Systems\nAPI Integrations"],
+            ['icon' => 'bi-cloud', 'title' => 'Cloud Infrastructure', 'description' => 'Secure, scalable and high-availability cloud environments optimized for performance.', 'highlights' => "AWS & Azure\nDevOps Pipelines\nServer Management"],
+            ['icon' => 'bi-phone', 'title' => 'Mobile App Development', 'description' => 'User-friendly Android and iOS applications designed for scalability and real-world performance.', 'highlights' => ''],
+            ['icon' => 'bi-gear', 'title' => 'Automation Solutions', 'description' => 'Intelligent automation systems that streamline workflows and improve operational efficiency.', 'highlights' => ''],
+            ['icon' => 'bi-shield-lock', 'title' => 'Cybersecurity Services', 'description' => 'Enterprise-grade security systems protecting infrastructure, applications and sensitive business data.', 'highlights' => ''],
+        ]);
+        $servicesDelays = ['0.1s', '0.3s', '0.5s', '0.7s', '0.9s', '1.1s'];
+    @endphp
+
     <!-- Services Section Start -->
     <div class="container-fluid container-service py-5 bg-light">
         <div class="container">
@@ -125,206 +135,50 @@
                 style="max-width: 700px;">
 
                 <h1 class="display-6 mb-3">
-                    Professional Services We Offer
+                    {{ $servicesHeading }}
                 </h1>
 
                 <p>
-                    End-to-end technology services built to support innovation,
-                    scalability and digital transformation.
+                    {{ $servicesSubheading }}
                 </p>
 
             </div>
 
             <div class="row g-4">
 
-                <!-- EV Charging -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                @foreach ($services as $index => $service)
+                    @php $highlights = Content::lines(Content::itemField($service, 'highlights')); @endphp
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="{{ $servicesDelays[$index] ?? '0.1s' }}">
 
-                    <div class="service-item h-100">
+                        <div class="service-item h-100">
 
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-ev-station text-dark"></i>
+                            <div class="icon-box-primary mb-4">
+                                <i class="bi {{ Content::itemField($service, 'icon', 'bi-gear') }} text-dark"></i>
+                            </div>
+
+                            <h4 class="mb-3">
+                                {{ Content::itemField($service, 'title') }}
+                            </h4>
+
+                            <p class="mb-4">
+                                {{ Content::itemField($service, 'description') }}
+                            </p>
+
+                            @if (! empty($highlights))
+                                <ul class="list-unstyled small">
+                                    @foreach ($highlights as $highlightIndex => $highlight)
+                                        <li class="{{ $loop->last ? '' : 'mb-2' }}">
+                                            <i class="bi bi-check2 text-primary me-2"></i>
+                                            {{ $highlight }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+
                         </div>
 
-                        <h4 class="mb-3">
-                            EV Charging Solutions
-                        </h4>
-
-                        <p class="mb-4">
-                            Smart EV charging infrastructure designed for residential,
-                            commercial and public mobility networks.
-                        </p>
-
-                        <ul class="list-unstyled small">
-
-                            <li class="mb-2">
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                AC/DC Chargers
-                            </li>
-
-                            <li class="mb-2">
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                Smart Monitoring
-                            </li>
-
-                            <li>
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                Energy Optimization
-                            </li>
-
-                        </ul>
-
                     </div>
-
-                </div>
-
-                <!-- Software -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-
-                    <div class="service-item h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-code-slash text-dark"></i>
-                        </div>
-
-                        <h4 class="mb-3">
-                            Custom Software Development
-                        </h4>
-
-                        <p class="mb-4">
-                            High-performance web and enterprise software tailored
-                            for modern business operations.
-                        </p>
-
-                        <ul class="list-unstyled small">
-
-                            <li class="mb-2">
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                Laravel Development
-                            </li>
-
-                            <li class="mb-2">
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                CRM/ERP Systems
-                            </li>
-
-                            <li>
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                API Integrations
-                            </li>
-
-                        </ul>
-
-                    </div>
-
-                </div>
-
-                <!-- Cloud -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-
-                    <div class="service-item h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-cloud text-dark"></i>
-                        </div>
-
-                        <h4 class="mb-3">
-                            Cloud Infrastructure
-                        </h4>
-
-                        <p class="mb-4">
-                            Secure, scalable and high-availability cloud environments
-                            optimized for performance.
-                        </p>
-
-                        <ul class="list-unstyled small">
-
-                            <li class="mb-2">
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                AWS & Azure
-                            </li>
-
-                            <li class="mb-2">
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                DevOps Pipelines
-                            </li>
-
-                            <li>
-                                <i class="bi bi-check2 text-primary me-2"></i>
-                                Server Management
-                            </li>
-
-                        </ul>
-
-                    </div>
-
-                </div>
-
-                <!-- Mobile Apps -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
-
-                    <div class="service-item h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-phone text-dark"></i>
-                        </div>
-
-                        <h4 class="mb-3">
-                            Mobile App Development
-                        </h4>
-
-                        <p class="mb-4">
-                            User-friendly Android and iOS applications designed
-                            for scalability and real-world performance.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <!-- Automation -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.9s">
-
-                    <div class="service-item h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-gear text-dark"></i>
-                        </div>
-
-                        <h4 class="mb-3">
-                            Automation Solutions
-                        </h4>
-
-                        <p class="mb-4">
-                            Intelligent automation systems that streamline
-                            workflows and improve operational efficiency.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <!-- Cybersecurity -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="1.1s">
-
-                    <div class="service-item h-100">
-
-                        <div class="icon-box-primary mb-4">
-                            <i class="bi bi-shield-lock text-dark"></i>
-                        </div>
-
-                        <h4 class="mb-3">
-                            Cybersecurity Services
-                        </h4>
-
-                        <p class="mb-4">
-                            Enterprise-grade security systems protecting infrastructure,
-                            applications and sensitive business data.
-                        </p>
-
-                    </div>
-
-                </div>
+                @endforeach
 
             </div>
 
@@ -332,6 +186,18 @@
     </div>
     <!-- Services Section End -->
 
+
+    @php
+        $featuresSection = $sections['features'] ?? null;
+        $featuresHeading = Content::field($featuresSection, 'heading', 'Why Businesses Choose Us');
+        $featuresSubheading = Content::field($featuresSection, 'subheading', 'We combine innovation, engineering expertise and scalable infrastructure to deliver reliable business solutions.');
+        $features = Content::items($featuresSection, [
+            ['icon' => 'bi-lightbulb', 'title' => 'Innovation First', 'description' => 'Building modern digital ecosystems with future-ready technologies.', '_delay' => '0.1s'],
+            ['icon' => 'bi-people', 'title' => 'Expert Team', 'description' => 'Experienced engineers focused on quality and scalable architecture.', '_delay' => '0.3s'],
+            ['icon' => 'bi-bar-chart', 'title' => 'Scalable Systems', 'description' => 'Solutions engineered to grow with your business operations.', '_delay' => '0.5s'],
+            ['icon' => 'bi-headset', 'title' => '24/7 Support', 'description' => 'Reliable support and monitoring for uninterrupted performance.', '_delay' => '0.7s'],
+        ]);
+    @endphp
 
     <!-- Why Choose Us Start -->
     <div class="container-fluid py-5">
@@ -342,89 +208,36 @@
                 data-wow-delay="0.1s">
 
                 <h1 class="display-6 mb-3">
-                    Why Businesses Choose Us
+                    {{ $featuresHeading }}
                 </h1>
 
                 <p>
-                    We combine innovation, engineering expertise and scalable
-                    infrastructure to deliver reliable business solutions.
+                    {{ $featuresSubheading }}
                 </p>
 
             </div>
 
             <div class="row g-4">
 
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                @foreach ($features as $feature)
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ Content::itemField($feature, '_delay', '0.1s') }}">
 
-                    <div class="feature-item border rounded p-4 h-100 text-center">
+                        <div class="feature-item border rounded p-4 h-100 text-center">
 
-                        <div class="icon-box-primary mx-auto mb-4">
-                            <i class="bi bi-lightbulb text-dark"></i>
+                            <div class="icon-box-primary mx-auto mb-4">
+                                <i class="bi {{ Content::itemField($feature, 'icon', 'bi-lightbulb') }} text-dark"></i>
+                            </div>
+
+                            <h5>{{ Content::itemField($feature, 'title') }}</h5>
+
+                            <p class="mb-0">
+                                {{ Content::itemField($feature, 'description') }}
+                            </p>
+
                         </div>
 
-                        <h5>Innovation First</h5>
-
-                        <p class="mb-0">
-                            Building modern digital ecosystems with future-ready technologies.
-                        </p>
-
                     </div>
-
-                </div>
-
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-
-                    <div class="feature-item border rounded p-4 h-100 text-center">
-
-                        <div class="icon-box-primary mx-auto mb-4">
-                            <i class="bi bi-people text-dark"></i>
-                        </div>
-
-                        <h5>Expert Team</h5>
-
-                        <p class="mb-0">
-                            Experienced engineers focused on quality and scalable architecture.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-
-                    <div class="feature-item border rounded p-4 h-100 text-center">
-
-                        <div class="icon-box-primary mx-auto mb-4">
-                            <i class="bi bi-bar-chart text-dark"></i>
-                        </div>
-
-                        <h5>Scalable Systems</h5>
-
-                        <p class="mb-0">
-                            Solutions engineered to grow with your business operations.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
-
-                    <div class="feature-item border rounded p-4 h-100 text-center">
-
-                        <div class="icon-box-primary mx-auto mb-4">
-                            <i class="bi bi-headset text-dark"></i>
-                        </div>
-
-                        <h5>24/7 Support</h5>
-
-                        <p class="mb-0">
-                            Reliable support and monitoring for uninterrupted performance.
-                        </p>
-
-                    </div>
-
-                </div>
+                @endforeach
 
             </div>
 
@@ -433,39 +246,36 @@
     <!-- Why Choose Us End -->
 
 
+    @php
+        $statsSection = $sections['stats'] ?? null;
+        $stats = Content::items($statsSection, [
+            ['label' => 'Projects Delivered', 'value' => '100+', '_delay' => '0.1s'],
+            ['label' => 'Business Clients', 'value' => '50+', '_delay' => '0.3s'],
+            ['label' => 'System Uptime', 'value' => '99%', '_delay' => '0.5s'],
+            ['label' => 'Technical Support', 'value' => '24/7', '_delay' => '0.7s'],
+        ]);
+
+        $ctaSection = $sections['cta'] ?? null;
+        $ctaHeading = Content::field($ctaSection, 'heading', 'Ready to Transform Your Business?');
+        $ctaBody = Content::field($ctaSection, 'body', 'Let’s build scalable technology solutions that drive innovation and growth.');
+        $ctaButtonText = Content::field($ctaSection, 'button_text', 'Get Started');
+        $ctaButtonUrl = Content::field($ctaSection, 'button_url', url('/contact'));
+    @endphp
+
     <!-- Stats Start -->
     <div class="container-fluid py-5 bg-primary">
         <div class="container">
 
             <div class="row text-center text-white g-4">
 
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                @foreach ($stats as $stat)
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ Content::itemField($stat, '_delay', '0.1s') }}">
 
-                    <h1 class="display-4 text-white">100+</h1>
-                    <p class="mb-0">Projects Delivered</p>
+                        <h1 class="display-4 text-white">{{ Content::itemField($stat, 'value') }}</h1>
+                        <p class="mb-0">{{ Content::itemField($stat, 'label') }}</p>
 
-                </div>
-
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-
-                    <h1 class="display-4 text-white">50+</h1>
-                    <p class="mb-0">Business Clients</p>
-
-                </div>
-
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-
-                    <h1 class="display-4 text-white">99%</h1>
-                    <p class="mb-0">System Uptime</p>
-
-                </div>
-
-                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
-
-                    <h1 class="display-4 text-white">24/7</h1>
-                    <p class="mb-0">Technical Support</p>
-
-                </div>
+                    </div>
+                @endforeach
 
             </div>
 
@@ -479,17 +289,17 @@
         <div class="container text-center">
 
             <h1 class="display-5 mb-4 wow fadeInUp">
-                Ready to Transform Your Business?
+                {{ $ctaHeading }}
             </h1>
 
             <p class="fs-5 mb-4 wow fadeInUp">
-                Let’s build scalable technology solutions that drive innovation and growth.
+                {{ $ctaBody }}
             </p>
 
-            <a href="{{ url('/contact') }}"
+            <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-primary py-3 px-5 wow fadeInUp">
 
-                Get Started
+                {{ $ctaButtonText }}
 
             </a>
 

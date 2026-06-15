@@ -233,6 +233,8 @@ class PageManagementTest extends TestCase
         $user = User::factory()->create();
         $section = $this->homeSection('ev_solutions');
 
+        $existingIds = $section->items->pluck('id');
+
         // Add a new "solution-card" item.
         $addResponse = $this->actingAs($user)->post(route('admin.section-items.store', $section), [
             'fields' => [
@@ -245,9 +247,9 @@ class PageManagementTest extends TestCase
         $addResponse->assertSessionHasNoErrors();
 
         $section->refresh();
-        $this->assertCount(1, $section->items);
+        $this->assertCount($existingIds->count() + 1, $section->items);
 
-        $item = $section->items->first();
+        $item = $section->items->whereNotIn('id', $existingIds)->first();
         $this->assertSame('solution-card', $item->item_type);
         $this->assertSame('Fast Charging', $item->fields->firstWhere('field_key', 'title')->value);
 
@@ -293,8 +295,10 @@ class PageManagementTest extends TestCase
         $user = User::factory()->create();
         $section = $this->homeSection('ev_solutions');
 
-        $first = $section->items()->create(['item_type' => 'solution-card', 'order_column' => 0, 'is_active' => true]);
-        $second = $section->items()->create(['item_type' => 'solution-card', 'order_column' => 1, 'is_active' => true]);
+        $base = $section->items()->max('order_column') + 1;
+
+        $first = $section->items()->create(['item_type' => 'solution-card', 'order_column' => $base, 'is_active' => true]);
+        $second = $section->items()->create(['item_type' => 'solution-card', 'order_column' => $base + 1, 'is_active' => true]);
 
         $response = $this->actingAs($user)->post(route('admin.section-items.move', $second), [
             'direction' => 'up',
@@ -302,8 +306,8 @@ class PageManagementTest extends TestCase
 
         $response->assertRedirect();
 
-        $this->assertSame(0, $second->refresh()->order_column);
-        $this->assertSame(1, $first->refresh()->order_column);
+        $this->assertSame($base, $second->refresh()->order_column);
+        $this->assertSame($base + 1, $first->refresh()->order_column);
     }
 
     public function test_section_item_move_up_is_noop_for_first_item(): void
@@ -311,7 +315,8 @@ class PageManagementTest extends TestCase
         $user = User::factory()->create();
         $section = $this->homeSection('ev_solutions');
 
-        $first = $section->items()->create(['item_type' => 'solution-card', 'order_column' => 0, 'is_active' => true]);
+        $first = $section->items->sortBy('order_column')->first();
+        $originalOrder = $first->order_column;
 
         $response = $this->actingAs($user)->post(route('admin.section-items.move', $first), [
             'direction' => 'up',
@@ -319,7 +324,7 @@ class PageManagementTest extends TestCase
 
         $response->assertRedirect();
 
-        $this->assertSame(0, $first->refresh()->order_column);
+        $this->assertSame($originalOrder, $first->refresh()->order_column);
     }
 
     private function homeSection(string $sectionKey): PageSection
