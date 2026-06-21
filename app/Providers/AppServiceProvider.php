@@ -7,7 +7,10 @@ use App\Models\Menu;
 use App\Models\NewsArticle;
 use App\Models\Product;
 use App\Models\Setting;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -50,6 +53,22 @@ class AppServiceProvider extends ServiceProvider
         $this->app->terminating(function () {
             $this->app->forgetInstance('cms.theme-settings');
             $this->app->forgetInstance('cms.menus');
+        });
+
+        // Public form submissions (Contact, Appointment, Product Inquiry):
+        // two independent limits, both enforced. The per-IP limit catches
+        // rapid-fire bot bursts; the per-email limit exists for a different
+        // reason — every submission emails a confirmation to the address in
+        // the "email" field, so without this an attacker could submit the
+        // form repeatedly with a victim's address to flood their inbox
+        // (an "email bomb"), while easily staying under any per-IP limit by
+        // rotating IPs/proxies. Limiting by the submitted email closes that
+        // off regardless of how many IPs are used.
+        RateLimiter::for('public-form', function (Request $request) {
+            return [
+                Limit::perMinute(5)->by('form-ip:'.$request->ip()),
+                Limit::perHour(3)->by('form-email:'.strtolower((string) $request->input('email'))),
+            ];
         });
     }
 

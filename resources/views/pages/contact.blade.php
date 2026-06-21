@@ -233,6 +233,7 @@
                         <form method="POST" action="{{ route('contact.submit') }}">
 
                             @csrf
+                            @include('partials.spam-protection-fields')
 
                             <div class="row g-4">
 

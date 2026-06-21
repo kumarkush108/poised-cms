@@ -42,11 +42,11 @@ Route::get('/contact', fn () => app(PageController::class)->show('contact', 'pag
     ->name('contact');
 
 Route::post('/contact', fn (Request $request) => app(ContactMessageController::class)->store($request, 'contact'))
-    ->middleware('throttle:10,1')
+    ->middleware(['throttle:public-form', 'spam-protection'])
     ->name('contact.submit');
 
 Route::post('/appointment', fn (Request $request) => app(ContactMessageController::class)->store($request, 'home'))
-    ->middleware('throttle:10,1')
+    ->middleware(['throttle:public-form', 'spam-protection'])
     ->name('appointment.submit');
 
 Route::get('/products', [ProductController::class, 'index'])
@@ -57,7 +57,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])
     ->name('products.show');
 
 Route::post('/products/inquiry', fn (Request $request) => app(ContactMessageController::class)->store($request, 'product-inquiry'))
-    ->middleware('throttle:10,1')
+    ->middleware(['throttle:public-form', 'spam-protection'])
     ->name('products.inquiry');
 
 Route::get('/blog', [BlogController::class, 'index'])

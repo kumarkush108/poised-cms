@@ -113,4 +113,20 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Notification Recipient
+    |--------------------------------------------------------------------------
+    |
+    | Where form-submission notification emails (Contact, Appointment,
+    | Product Inquiry) are sent. Falls back to the CMS "contact_email"
+    | Setting (Admin > Settings > Contact Information) when this env var
+    | is unset, so a deployment works out of the box without extra config,
+    | while still letting ops point notifications at a different inbox
+    | than the publicly-displayed contact address if needed.
+    |
+    */
+
+    'admin_address' => env('MAIL_ADMIN_ADDRESS'),
+
 ];

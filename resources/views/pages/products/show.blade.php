@@ -202,6 +202,7 @@
 
                     <form method="POST" action="{{ route('products.inquiry') }}">
                         @csrf
+                        @include('partials.spam-protection-fields')
                         <input type="hidden" name="subject" value="Product Inquiry: {{ $product->title }}">
                         <div class="row g-3">
                             <div class="col-sm-6">

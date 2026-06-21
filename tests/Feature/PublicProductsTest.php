@@ -77,10 +77,13 @@ class PublicProductsTest extends TestCase
 
     public function test_product_inquiry_form_creates_a_contact_message(): void
     {
+        \Illuminate\Support\Facades\Mail::fake();
+
         $response = $this->post(route('products.inquiry'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'I am interested in this product.',
+            'form_rendered_at' => encrypt(time() - 5),
         ]);
 
         $response->assertRedirect();

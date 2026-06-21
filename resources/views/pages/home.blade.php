@@ -579,6 +579,7 @@
 
                     <form method="POST" action="{{ route('appointment.submit') }}">
                         @csrf
+                        @include('partials.spam-protection-fields')
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <div class="form-floating">
