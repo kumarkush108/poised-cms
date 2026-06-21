@@ -54,6 +54,19 @@ class PageManagementTest extends TestCase
         $response->assertSee('EV Solutions');
     }
 
+    public function test_icon_fields_render_a_picker_trigger_instead_of_a_plain_text_box(): void
+    {
+        $user = User::factory()->create();
+        $about = Page::where('slug', 'about')->first();
+
+        $response = $this->actingAs($user)->get(route('admin.pages.edit', $about));
+
+        $response->assertOk();
+        $response->assertSee('js-icon-pick', false);
+        $response->assertSee('data-icon-input', false);
+        $response->assertSee('data-icon-preview', false);
+    }
+
     public function test_authenticated_user_can_update_page_details(): void
     {
         $user = User::factory()->create();

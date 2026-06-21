@@ -4,9 +4,31 @@
     part of the parent form. Expected variables:
     - $name: form field base name, e.g. 'features' or 'specifications'
     - $rows: current array of associative arrays
-    - $fields: ordered [['key'=>,'label'=>,'type'=>'text'|'textarea'], ...]
+    - $fields: ordered [['key'=>,'label'=>,'type'=>'text'|'textarea'|'icon'], ...]
     - $addLabel: button text, e.g. "Add Feature"
 --}}
+
+@php
+    $renderRowField = function (string $rowName, string $fieldKey, string $label, string $type, $value) {
+        $inputName = "{$rowName}[{$fieldKey}]";
+
+        if ($type === 'textarea') {
+            return '<textarea class="form-control form-control-sm" name="' . $inputName . '" placeholder="' . e($label) . '" rows="2">' . e($value) . '</textarea>';
+        }
+
+        if ($type === 'icon') {
+            $previewClass = $value !== '' ? 'bi ' . e($value) : 'bi bi-question-circle text-muted';
+
+            return '<div class="icon-field input-group input-group-sm">'
+                . '<span class="input-group-text icon-preview" data-icon-preview><i class="' . $previewClass . '"></i></span>'
+                . '<input type="text" class="form-control form-control-sm" name="' . $inputName . '" placeholder="' . e($label) . '" value="' . e($value) . '" data-icon-input>'
+                . '<button type="button" class="btn btn-outline-secondary js-icon-pick" tabindex="-1"><i class="bi bi-grid-3x3-gap"></i></button>'
+                . '</div>';
+        }
+
+        return '<input type="text" class="form-control form-control-sm" name="' . $inputName . '" placeholder="' . e($label) . '" value="' . e($value) . '">';
+    };
+@endphp
 
 <div class="json-rows" data-json-rows data-name="{{ $name }}">
     <div class="json-rows-list">
@@ -14,11 +36,7 @@
             <div class="json-row row g-2 align-items-start mb-2">
                 @foreach ($fields as $field)
                     <div class="col">
-                        @if (($field['type'] ?? 'text') === 'textarea')
-                            <textarea class="form-control form-control-sm" name="{{ $name }}[{{ $i }}][{{ $field['key'] }}]" placeholder="{{ $field['label'] }}" rows="2">{{ $row[$field['key']] ?? '' }}</textarea>
-                        @else
-                            <input type="text" class="form-control form-control-sm" name="{{ $name }}[{{ $i }}][{{ $field['key'] }}]" placeholder="{{ $field['label'] }}" value="{{ $row[$field['key']] ?? '' }}">
-                        @endif
+                        {!! $renderRowField("{$name}[{$i}]", $field['key'], $field['label'], $field['type'] ?? 'text', $row[$field['key']] ?? '') !!}
                     </div>
                 @endforeach
                 <div class="col-auto">
@@ -38,11 +56,7 @@
         <div class="json-row row g-2 align-items-start mb-2">
             @foreach ($fields as $field)
                 <div class="col">
-                    @if (($field['type'] ?? 'text') === 'textarea')
-                        <textarea class="form-control form-control-sm" name="{{ $name }}[__INDEX__][{{ $field['key'] }}]" placeholder="{{ $field['label'] }}" rows="2"></textarea>
-                    @else
-                        <input type="text" class="form-control form-control-sm" name="{{ $name }}[__INDEX__][{{ $field['key'] }}]" placeholder="{{ $field['label'] }}">
-                    @endif
+                    {!! $renderRowField("{$name}[__INDEX__]", $field['key'], $field['label'], $field['type'] ?? 'text', '') !!}
                 </div>
             @endforeach
             <div class="col-auto">

@@ -132,7 +132,7 @@ return [
                 'fields' => [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                     'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
                 ],
             ],
@@ -152,7 +152,7 @@ return [
                 'fields' => [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                     'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
                 ],
             ],
@@ -211,7 +211,7 @@ return [
                 'fields' => [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                 ],
             ],
         ],
@@ -232,7 +232,7 @@ return [
                 'fields' => [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                 ],
             ],
         ],
@@ -264,7 +264,7 @@ return [
                 'fields' => [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                     'link_url' => ['label' => 'Link URL', 'type' => 'url', 'required' => false],
                     'link_text' => ['label' => 'Link Text', 'type' => 'string', 'required' => false],
                     'highlights' => ['label' => 'Highlights (one per line)', 'type' => 'text', 'required' => false],
@@ -419,7 +419,7 @@ return [
                 'fields' => [
                     'text' => ['label' => 'Text', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                 ],
             ],
         ],
@@ -435,7 +435,7 @@ return [
                 'item_type' => 'info-card',
                 'label' => 'Card',
                 'fields' => [
-                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'icon' => ['label' => 'Icon', 'type' => 'icon', 'required' => false],
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
                 ],

@@ -46,6 +46,7 @@
 <!-- Shared modals (available on every admin page) -->
 @include('admin.partials.media-picker-modal')
 @include('admin.partials.confirm-modal')
+@include('admin.partials.icon-picker-modal')
 
 <!-- JS -->
 <script src="{{ asset('admin/assets/js/bootstrap.bundle.min.js') }}"></script>

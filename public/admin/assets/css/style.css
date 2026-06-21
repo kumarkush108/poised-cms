@@ -1841,6 +1841,53 @@ html[data-theme="dark"] {
   grid-column: 1 / -1;
 }
 
+/* ---------- Icon picker ---------- */
+
+.icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: .4rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.icon-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  padding: .5rem .25rem;
+  cursor: pointer;
+  border-radius: .375rem;
+  border: 2px solid transparent;
+  background: var(--admin-bg);
+  transition: border-color .15s, transform .1s;
+}
+
+.icon-picker-item i {
+  font-size: 1.25rem;
+}
+
+.icon-picker-item:hover {
+  border-color: var(--admin-primary);
+  transform: translateY(-1px);
+}
+
+.icon-picker-item.selected {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-primary) 25%, transparent);
+}
+
+.icon-picker-empty {
+  grid-column: 1 / -1;
+}
+
+.icon-field .icon-preview {
+  width: 2.75rem;
+  justify-content: center;
+}
+
 /* ---------- Richtext editor (Tiptap) ---------- */
 
 .richtext-wrapper {

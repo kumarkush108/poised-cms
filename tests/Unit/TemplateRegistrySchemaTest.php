@@ -297,6 +297,26 @@ class TemplateRegistrySchemaTest extends TestCase
         $this->assertNotNull(TemplateRegistry::section('content'));
     }
 
+    public function test_every_icon_field_uses_the_dedicated_icon_type_not_plain_string(): void
+    {
+        // Every item type with an "icon" field must use type "icon" (renders
+        // the visual picker in field-input.blade.php) rather than a plain
+        // "string" input — otherwise it falls back to a free-text box and
+        // the user has to know the exact Bootstrap Icons class name.
+        $itemTypesWithIcon = ['feature', 'solution-card', 'service-card', 'checklist-item', 'info-card'];
+
+        foreach ($itemTypesWithIcon as $itemType) {
+            $sectionKey = collect(config('cms.templates.sections'))
+                ->search(fn ($section) => ($section['items']['item_type'] ?? null) === $itemType);
+
+            $this->assertNotFalse($sectionKey, "No section found using item_type [$itemType].");
+
+            $fields = TemplateRegistry::itemFields($sectionKey);
+            $this->assertArrayHasKey('icon', $fields);
+            $this->assertSame('icon', $fields['icon']['type'], "icon field for item_type [$itemType] should be type 'icon'.");
+        }
+    }
+
     public function test_content_section_has_no_badge_fields_and_is_shared_by_three_pages(): void
     {
         // 'content' is reused by services/solutions/contact, none of which have

@@ -473,13 +473,127 @@ function initIconPreview() {
         const input = e.target.closest('[data-icon-input]');
         if (!input) return;
 
-        const wrapper = input.closest('.input-group');
+        const wrapper = input.closest('.icon-field');
         const preview = wrapper?.querySelector('[data-icon-preview] i');
         if (!preview) return;
 
         const val = input.value.trim();
         preview.className = val ? `bi ${val}` : 'bi bi-question-circle text-muted';
     });
+}
+
+// ── Icon picker modal ─────────────────────────────────────────────────────────
+
+// The full Bootstrap Icons name list (no "bi-" prefix) is generated once from
+// the vendored bootstrap-icons.css — see public/admin/assets/data/bootstrap-icons.json.
+// Fetched lazily on first open and cached here; ~2000 names is small enough to
+// render as plain DOM nodes once and filter by toggling display, rather than
+// re-rendering on every keystroke.
+let iconNamesCache = null;
+let activeIconInput = null;
+
+function initIconPicker() {
+    const modal      = document.getElementById('iconPickerModal');
+    const grid       = document.getElementById('iconPickerGrid');
+    const searchInput = document.getElementById('iconPickerSearch');
+    const noneBtn    = document.getElementById('iconPickerNone');
+    const countEl    = document.getElementById('iconPickerCount');
+
+    if (!modal) return;
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.js-icon-pick');
+        if (!btn) return;
+
+        activeIconInput = btn.closest('.icon-field')?.querySelector('[data-icon-input]') ?? null;
+        if (!activeIconInput) return;
+
+        if (searchInput) searchInput.value = '';
+        ensureGridRendered().then(() => {
+            filterGrid('');
+            highlightCurrent();
+        });
+
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+    });
+
+    if (searchInput) {
+        let searchTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => filterGrid(searchInput.value.trim().toLowerCase()), 150);
+        });
+    }
+
+    if (noneBtn) {
+        noneBtn.addEventListener('click', () => {
+            setActiveIconValue('');
+            closeModal();
+        });
+    }
+
+    async function ensureGridRendered() {
+        if (iconNamesCache !== null) return;
+
+        if (grid) grid.innerHTML = '<div class="icon-picker-empty text-center py-5 w-100"><i class="bi bi-hourglass-split fs-2 d-block mb-2 text-muted"></i>Loading icons…</div>';
+
+        try {
+            const res = await fetch('/admin/assets/data/bootstrap-icons.json');
+            iconNamesCache = await res.json();
+        } catch (err) {
+            // Leave the cache as null so the next open retries the fetch
+            // instead of being stuck showing this error permanently.
+            if (grid) grid.innerHTML = '<div class="icon-picker-empty text-center py-5 w-100 text-danger">Failed to load icons.</div>';
+            return;
+        }
+
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        iconNamesCache.forEach((name) => {
+            const el = document.createElement('div');
+            el.className = 'icon-picker-item';
+            el.dataset.name = name;
+            el.title = name;
+            el.innerHTML = `<i class="bi bi-${name}"></i>`;
+            el.addEventListener('click', () => {
+                setActiveIconValue(`bi-${name}`);
+                closeModal();
+            });
+            grid.appendChild(el);
+        });
+    }
+
+    function filterGrid(term) {
+        if (!grid) return;
+        let visible = 0;
+
+        grid.querySelectorAll('.icon-picker-item').forEach((el) => {
+            const matches = !term || el.dataset.name.includes(term);
+            el.classList.toggle('d-none', !matches);
+            if (matches) visible++;
+        });
+
+        if (countEl) countEl.textContent = `${visible} icon${visible !== 1 ? 's' : ''}`;
+    }
+
+    function highlightCurrent() {
+        if (!grid) return;
+        const current = (activeIconInput?.value ?? '').trim().replace(/^bi-/, '');
+        grid.querySelectorAll('.icon-picker-item').forEach((el) => {
+            el.classList.toggle('selected', !!current && el.dataset.name === current);
+        });
+    }
+
+    function setActiveIconValue(value) {
+        if (!activeIconInput) return;
+        activeIconInput.value = value;
+        activeIconInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function closeModal() {
+        bootstrap.Modal.getInstance(modal)?.hide();
+    }
 }
 
 // ── Repeatable JSON-column rows (Product features/specifications) ─────────────
@@ -561,5 +675,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initJsonRows();
     initConfirmModal();
     initIconPreview();
+    initIconPicker();
     initAccordionState();
 });

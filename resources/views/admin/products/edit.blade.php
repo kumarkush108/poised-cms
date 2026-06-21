@@ -132,7 +132,7 @@
                 'name' => 'features',
                 'rows' => old('features', $product->features ?? []),
                 'fields' => [
-                    ['key' => 'icon', 'label' => 'Icon class (e.g. bi-check-circle)'],
+                    ['key' => 'icon', 'label' => 'Icon', 'type' => 'icon'],
                     ['key' => 'title', 'label' => 'Title'],
                     ['key' => 'description', 'label' => 'Description', 'type' => 'textarea'],
                 ],

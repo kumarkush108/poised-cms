@@ -33,6 +33,22 @@ class ProductManagementTest extends TestCase
         $this->assertDatabaseHas('products', ['slug' => 'smart-charger', 'title' => 'Smart Charger']);
     }
 
+    public function test_features_icon_field_renders_a_picker_trigger_instead_of_a_plain_text_box(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::create([
+            'slug' => 'smart-charger', 'title' => 'Smart Charger', 'status' => 'draft',
+            'features' => [['icon' => 'bi-star', 'title' => 'Test Feature', 'description' => 'desc']],
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.products.edit', $product));
+
+        $response->assertOk();
+        $response->assertSee('js-icon-pick', false);
+        $response->assertSee('data-icon-input', false);
+        $response->assertSee('value="bi-star"', false);
+    }
+
     public function test_product_creation_rejects_duplicate_slug(): void
     {
         $user = User::factory()->create();
