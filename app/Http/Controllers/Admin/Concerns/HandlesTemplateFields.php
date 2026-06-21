@@ -7,6 +7,8 @@ use Illuminate\Validation\Rule;
 
 trait HandlesTemplateFields
 {
+    use ValidatesUrlOrPath;
+
     /**
      * Build validation rules for a set of TemplateRegistry field definitions,
      * keyed as "fields.{field_key}".
@@ -37,25 +39,6 @@ trait HandlesTemplateFields
         }
 
         return $rules;
-    }
-
-    /**
-     * Accepts an absolute URL, a site-relative path ("/contact"), or a
-     * mailto:/tel: link.
-     */
-    protected function urlOrPathRule(): \Closure
-    {
-        return function (string $attribute, $value, \Closure $fail) {
-            if (filter_var($value, FILTER_VALIDATE_URL) !== false) {
-                return;
-            }
-
-            if (preg_match('#^(/[^\s]*|mailto:.+|tel:.+)$#', $value)) {
-                return;
-            }
-
-            $fail('The :attribute must be a valid URL, a site-relative path, or a mailto:/tel: link.');
-        };
     }
 
     /**

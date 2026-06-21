@@ -64,6 +64,14 @@ class BlogPost extends Model
         return $query->where('status', 'published');
     }
 
+    /**
+     * Relative (not absolute) on purpose — see Product::url() for why.
+     */
+    public function url(): string
+    {
+        return route('blog.show', $this->slug, absolute: false);
+    }
+
     /** ~200 words/min, rounded up to at least 1 minute — not stored, derived on demand. */
     public function getReadingTimeAttribute(): int
     {

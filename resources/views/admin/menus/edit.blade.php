@@ -40,18 +40,48 @@
     </div>
 @endif
 
-@if ($errors->any())
-    <div class="alert alert-danger mt-3">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+@php
+    use App\Http\Controllers\Admin\MenuItemController;
+
+    // Each form on this page (one per existing item, plus "Add Menu Item")
+    // posts to a different route, but they all share field names like
+    // "label"/"url" — without a named error bag per form, a validation
+    // failure on ANY one of them would make every other form's matching
+    // @error() directive light up too, and old('label') would blank out
+    // every other form's input with the failed submission's value. Each
+    // form gets its own bag (set server-side via validateWithBag()), and
+    // old() is only consulted for a given form when THAT form's own bag
+    // actually has errors — otherwise the real saved value is shown.
+    $oldFor = fn ($bag) => fn (string $key, $default = null) => $bag->any() ? old($key, $default) : $default;
+
+    $resolveLinkType = function ($item) use ($products, $blogPosts, $newsArticles) {
+        if ($item->page_id) {
+            return ['type' => 'page', 'value' => null];
+        }
+
+        if ($item->url) {
+            foreach (['product' => $products, 'blog_post' => $blogPosts, 'news_article' => $newsArticles] as $type => $collection) {
+                $match = $collection->first(fn ($model) => $model->url() === $item->url);
+
+                if ($match) {
+                    return ['type' => $type, 'value' => $match->url()];
+                }
+            }
+        }
+
+        return ['type' => 'url', 'value' => null];
+    };
+@endphp
 
 {{-- Current items --}}
 @forelse ($menu->items as $item)
+
+    @php
+        $itemBag = MenuItemController::errorBagFor($item);
+        $itemErrors = $errors->getBag($itemBag);
+        $oldItem = $oldFor($itemErrors);
+        $linkType = $resolveLinkType($item);
+    @endphp
 
     <div class="card mb-3 mt-4">
 
@@ -106,7 +136,17 @@
 
         <div class="card-body">
 
-            <form method="POST" action="{{ route('admin.menu-items.update', $item) }}">
+            @if ($itemErrors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($itemErrors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('admin.menu-items.update', $item) }}" class="js-menu-link-form">
 
                 @csrf
                 @method('PATCH')
@@ -116,53 +156,41 @@
                     <div class="col-md-6">
                         <label class="form-label">Label</label>
                         <input type="text" name="label" class="form-control"
-                            value="{{ old('label', $item->label) }}">
+                            value="{{ $oldItem('label', $item->label) }}">
+                        @error('label', $itemBag)
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Target</label>
                         <select name="target" class="form-select">
-                            <option value="_self" @selected(old('target', $item->target) === '_self')>
+                            <option value="_self" @selected($oldItem('target', $item->target) === '_self')>
                                 Same window (_self)
                             </option>
-                            <option value="_blank" @selected(old('target', $item->target) === '_blank')>
+                            <option value="_blank" @selected($oldItem('target', $item->target) === '_blank')>
                                 New window (_blank)
                             </option>
                         </select>
+                        @error('target', $itemBag)
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            URL
-                            <span class="text-muted fw-normal">(optional if a page is selected)</span>
-                        </label>
-                        <input type="url" name="url" class="form-control"
-                            value="{{ old('url', $item->url) }}"
-                            placeholder="https://...">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Page
-                            <span class="text-muted fw-normal">(optional if a URL is entered)</span>
-                        </label>
-                        <select name="page_id" class="form-select">
-                            <option value="">— None —</option>
-                            @foreach ($pages as $page)
-                                <option value="{{ $page->id }}"
-                                    @selected((string) old('page_id', $item->page_id) === (string) $page->id)>
-                                    {{ $page->title }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @include('admin.menus.partials.link-fields', [
+                        'bagName' => $itemBag,
+                        'currentType' => $oldItem('page_id') ? 'page' : ($oldItem('url') ? 'url' : $linkType['type']),
+                        'currentUrl' => $oldItem('url', $item->url),
+                        'currentPickerValue' => $oldItem('url', $linkType['value']),
+                        'currentPageId' => $oldItem('page_id', $item->page_id),
+                    ])
 
                     <div class="col-12">
                         <div class="form-check">
                             <input type="checkbox" name="is_active" value="1"
                                 class="form-check-input"
                                 id="active_{{ $item->id }}"
-                                @checked(old('is_active', $item->is_active))>
+                                @checked($oldItem('is_active', $item->is_active))>
                             <label class="form-check-label" for="active_{{ $item->id }}">
                                 Active (visible on the public site)
                             </label>
@@ -194,6 +222,12 @@
 @endforelse
 
 {{-- Add new item --}}
+@php
+    $newItemBag = MenuItemController::NEW_ITEM_ERROR_BAG;
+    $newItemErrors = $errors->getBag($newItemBag);
+    $oldNew = $oldFor($newItemErrors);
+@endphp
+
 <div class="card mt-4">
 
     <div class="card-header">
@@ -202,7 +236,17 @@
 
     <div class="card-body">
 
-        <form method="POST" action="{{ route('admin.menu-items.store', $menu) }}">
+        @if ($newItemErrors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($newItemErrors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('admin.menu-items.store', $menu) }}" class="js-menu-link-form">
 
             @csrf
 
@@ -211,8 +255,8 @@
                 <div class="col-md-6">
                     <label class="form-label">Label <span class="text-danger">*</span></label>
                     <input type="text" name="label" class="form-control"
-                        value="{{ old('label') }}" placeholder="e.g. Home">
-                    @error('label')
+                        value="{{ $oldNew('label') }}" placeholder="e.g. Home">
+                    @error('label', $newItemBag)
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
@@ -220,43 +264,25 @@
                 <div class="col-md-6">
                     <label class="form-label">Target</label>
                     <select name="target" class="form-select">
-                        <option value="_self" @selected(old('target', '_self') === '_self')>
+                        <option value="_self" @selected($oldNew('target', '_self') === '_self')>
                             Same window (_self)
                         </option>
-                        <option value="_blank" @selected(old('target') === '_blank')>
+                        <option value="_blank" @selected($oldNew('target') === '_blank')>
                             New window (_blank)
                         </option>
                     </select>
-                    @error('target')
+                    @error('target', $newItemBag)
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">URL</label>
-                    <input type="url" name="url" class="form-control"
-                        value="{{ old('url') }}" placeholder="https://...">
-                    <div class="form-text">Enter a URL or select a page below — at least one is required.</div>
-                    @error('url')
-                        <div class="text-danger small mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Page</label>
-                    <select name="page_id" class="form-select">
-                        <option value="">— None —</option>
-                        @foreach ($pages as $page)
-                            <option value="{{ $page->id }}"
-                                @selected((string) old('page_id') === (string) $page->id)>
-                                {{ $page->title }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('page_id')
-                        <div class="text-danger small mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
+                @include('admin.menus.partials.link-fields', [
+                    'bagName' => $newItemBag,
+                    'currentType' => $oldNew('page_id') ? 'page' : 'url',
+                    'currentUrl' => $oldNew('url'),
+                    'currentPickerValue' => $oldNew('url'),
+                    'currentPageId' => $oldNew('page_id'),
+                ])
 
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">
@@ -271,5 +297,46 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+    (function () {
+        document.querySelectorAll('.js-menu-link-form').forEach(function (form) {
+            const typeSelect = form.querySelector('.js-link-type');
+            const urlInput = form.querySelector('.js-url-input');
+
+            function showFieldsFor(type) {
+                form.querySelectorAll('.js-link-field').forEach(function (field) {
+                    field.classList.toggle('d-none', field.dataset.linkType !== type);
+                });
+            }
+
+            typeSelect.addEventListener('change', function () {
+                showFieldsFor(typeSelect.value);
+
+                // Switching link type invalidates whatever was previously
+                // picked — clear every dependent field so the form never
+                // submits a stale page_id/url alongside a new selection.
+                urlInput.value = '';
+
+                const pageSelect = form.querySelector('.js-page-select');
+                if (pageSelect) pageSelect.value = '';
+
+                form.querySelectorAll('.js-content-picker-select').forEach(function (picker) {
+                    picker.value = '';
+                });
+            });
+
+            form.querySelectorAll('.js-content-picker-select').forEach(function (picker) {
+                picker.addEventListener('change', function () {
+                    urlInput.value = picker.value;
+                });
+            });
+
+            showFieldsFor(typeSelect.value);
+        });
+    })();
+</script>
+@endpush
 
 @endsection

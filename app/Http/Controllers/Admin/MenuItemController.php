@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\ValidatesUrlOrPath;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\MenuItem;
@@ -10,11 +11,22 @@ use Illuminate\Validation\Rule;
 
 class MenuItemController extends Controller
 {
+    use ValidatesUrlOrPath;
+
+    /** Shared by every "add new item" form across all menus — there's only ever one on a page. */
+    public const NEW_ITEM_ERROR_BAG = 'newMenuItem';
+
+    /** One independent error bag per existing item, so a failed edit never bleeds into other items' forms. */
+    public static function errorBagFor(MenuItem $menuItem): string
+    {
+        return 'menuItem' . $menuItem->id;
+    }
+
     public function store(Request $request, Menu $menu)
     {
-        $validated = $request->validate([
+        $validated = $request->validateWithBag(self::NEW_ITEM_ERROR_BAG, [
             'label'   => ['required', 'string', 'max:100'],
-            'url'     => ['nullable', 'url', 'max:255', 'required_without:page_id'],
+            'url'     => ['nullable', 'required_without:page_id', $this->urlRule()],
             'page_id' => ['nullable', 'integer', 'required_without:url',
                 Rule::exists('pages', 'id')->where(fn ($q) => $q->whereNull('deleted_at'))],
             'target'  => ['required', 'in:_self,_blank'],
@@ -37,9 +49,9 @@ class MenuItemController extends Controller
 
     public function update(Request $request, MenuItem $menuItem)
     {
-        $validated = $request->validate([
+        $validated = $request->validateWithBag(self::errorBagFor($menuItem), [
             'label'   => ['required', 'string', 'max:100'],
-            'url'     => ['nullable', 'url', 'max:255', 'required_without:page_id'],
+            'url'     => ['nullable', 'required_without:page_id', $this->urlRule()],
             'page_id' => ['nullable', 'integer', 'required_without:url',
                 Rule::exists('pages', 'id')->where(fn ($q) => $q->whereNull('deleted_at'))],
             'target'  => ['required', 'in:_self,_blank'],
@@ -87,5 +99,21 @@ class MenuItemController extends Controller
         $sibling->update(['order_column' => $itemOrder]);
 
         return back()->with('success', 'Item order updated.');
+    }
+
+    /**
+     * The "url" field doubles as the target for the admin's Product/Blog
+     * Post/News Article pickers (the form writes the picked resource's
+     * resolved url() into this same field via JS) as well as a manually
+     * typed custom URL/path, so it must accept a relative path
+     * ("/products/smart-charger") and not just an absolute URL.
+     */
+    private function urlRule()
+    {
+        return Rule::when(
+            fn ($input) => filled(data_get($input, 'url')),
+            [$this->urlOrPathRule(), 'max:255'],
+            ['max:255']
+        );
     }
 }

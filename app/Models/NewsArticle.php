@@ -58,4 +58,12 @@ class NewsArticle extends Model
     {
         return $query->where('status', 'published');
     }
+
+    /**
+     * Relative (not absolute) on purpose — see Product::url() for why.
+     */
+    public function url(): string
+    {
+        return route('news.show', $this->slug, absolute: false);
+    }
 }

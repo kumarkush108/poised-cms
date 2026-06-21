@@ -2,9 +2,13 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Http\Controllers\Admin\MenuItemController;
+use App\Models\BlogPost;
 use App\Models\Menu;
 use App\Models\MenuItem;
+use App\Models\NewsArticle;
 use App\Models\Page;
+use App\Models\Product;
 use App\Models\User;
 use Database\Seeders\MenusSeeder;
 use Database\Seeders\PagesSeeder;
@@ -95,6 +99,100 @@ class MenuManagementTest extends TestCase
         ]);
     }
 
+    public function test_create_item_using_relative_url_path(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+
+        $response = $this->actingAs($user)->post(route('admin.menu-items.store', $menu), [
+            'label'  => 'Products',
+            'url'    => '/products',
+            'target' => '_self',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('menu_items', [
+            'menu_id' => $menu->id,
+            'label'   => 'Products',
+            'url'     => '/products',
+        ]);
+    }
+
+    public function test_create_item_using_mailto_link(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+
+        $response = $this->actingAs($user)->post(route('admin.menu-items.store', $menu), [
+            'label'  => 'Email Us',
+            'url'    => 'mailto:hello@example.com',
+            'target' => '_self',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('menu_items', [
+            'menu_id' => $menu->id,
+            'label'   => 'Email Us',
+            'url'     => 'mailto:hello@example.com',
+        ]);
+    }
+
+    public function test_create_item_still_rejects_garbage_url(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+
+        $response = $this->actingAs($user)->post(route('admin.menu-items.store', $menu), [
+            'label'  => 'Bad Link',
+            'url'    => 'not a url at all',
+            'target' => '_self',
+        ]);
+
+        $response->assertSessionHasErrorsIn(MenuItemController::NEW_ITEM_ERROR_BAG, 'url');
+    }
+
+    public function test_create_item_linking_to_a_product(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+        $product = Product::create(['slug' => 'smart-charger', 'title' => 'Smart Charger', 'status' => 'published']);
+
+        $response = $this->actingAs($user)->post(route('admin.menu-items.store', $menu), [
+            'label'  => 'Smart Charger',
+            'url'    => $product->url(),
+            'target' => '_self',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('menu_items', [
+            'menu_id' => $menu->id,
+            'label'   => 'Smart Charger',
+            'url'     => '/products/smart-charger',
+        ]);
+    }
+
+    public function test_menu_editor_offers_product_blog_and_news_pickers(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+
+        Product::create(['slug' => 'smart-charger', 'title' => 'Smart Charger', 'status' => 'published']);
+        BlogPost::create(['slug' => 'first-post', 'title' => 'First Post', 'status' => 'published']);
+        NewsArticle::create(['slug' => 'first-article', 'title' => 'First Article', 'status' => 'published']);
+
+        $response = $this->actingAs($user)->get(route('admin.menus.edit', $menu));
+
+        $response->assertOk();
+        $response->assertSee('Smart Charger');
+        $response->assertSee('First Post');
+        $response->assertSee('First Article');
+        $response->assertSee('Blog Post');
+        $response->assertSee('News Article');
+    }
+
     public function test_create_item_using_page_id(): void
     {
         $user = User::factory()->create();
@@ -130,7 +228,7 @@ class MenuManagementTest extends TestCase
             'target' => '_self',
         ]);
 
-        $response->assertSessionHasErrors(['url', 'page_id']);
+        $response->assertSessionHasErrorsIn(MenuItemController::NEW_ITEM_ERROR_BAG, ['url', 'page_id']);
     }
 
     public function test_validation_fails_with_soft_deleted_page_id(): void
@@ -154,7 +252,78 @@ class MenuManagementTest extends TestCase
             'target'  => '_self',
         ]);
 
-        $response->assertSessionHasErrors('page_id');
+        $response->assertSessionHasErrorsIn(MenuItemController::NEW_ITEM_ERROR_BAG, 'page_id');
+    }
+
+    // ─── Cross-form error/value isolation ──────────────────────────────────────
+    // Every item's edit form and the "Add Menu Item" form live on the same page
+    // and share field names (label/url/page_id/target). Without per-form named
+    // error bags, a failed submission on one would make @error() fire — and
+    // old() blank out the value — on every other form too.
+
+    public function test_failed_add_item_submission_shows_error_only_on_the_add_form(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+
+        $this->actingAs($user)->post(route('admin.menu-items.store', $menu), [
+            'label'  => '',
+            'target' => '_self',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.menus.edit', $menu));
+
+        $response->assertOk();
+        $content = $response->getContent();
+
+        // Every other admin form in this app shows each error twice — once in
+        // a summary box, once inline next to the field — so 2 occurrences
+        // total (both inside the Add Item card) is correct. If error bags
+        // leaked across forms, this would instead be 2 + 1 per existing item
+        // (5 more, since each item's Label field also has its own @error()).
+        $this->assertSame(2, substr_count($content, 'The label field is required.'));
+    }
+
+    public function test_failed_add_item_submission_does_not_blank_existing_item_fields(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+
+        $this->actingAs($user)->post(route('admin.menu-items.store', $menu), [
+            'label'  => '',
+            'url'    => '',
+            'target' => '_self',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.menus.edit', $menu));
+
+        $response->assertOk();
+        // Existing items' own labels must still show their real saved value,
+        // not the empty string the failed Add form submitted.
+        $response->assertSee('value="Home"', false);
+        $response->assertSee('value="About"', false);
+    }
+
+    public function test_failed_update_on_one_item_does_not_affect_other_items_or_the_add_form(): void
+    {
+        $user = User::factory()->create();
+        $menu = Menu::where('key', 'header')->first();
+        $homeItem = $menu->items->firstWhere('label', 'Home');
+
+        $this->actingAs($user)->patch(route('admin.menu-items.update', $homeItem), [
+            'label'  => '',
+            'target' => '_self',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.menus.edit', $menu));
+
+        $response->assertOk();
+        $content = $response->getContent();
+
+        // Only Home's own form shows the error (summary + inline = 2) — not
+        // About's, not the Add Item form's.
+        $this->assertSame(2, substr_count($content, 'The label field is required.'));
+        $response->assertSee('value="About"', false);
     }
 
     // ─── Update ───────────────────────────────────────────────────────────────

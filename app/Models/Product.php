@@ -75,4 +75,16 @@ class Product extends Model
     {
         return $query->where('status', 'published');
     }
+
+    /**
+     * Relative (not absolute) on purpose: menu items that link to a product
+     * store this value directly in their plain `url` column at save time
+     * (unlike Page links, which re-resolve via page_id on every render), so
+     * baking in the current domain here would break those links on a future
+     * domain change.
+     */
+    public function url(): string
+    {
+        return route('products.show', $this->slug, absolute: false);
+    }
 }
