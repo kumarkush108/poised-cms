@@ -11,6 +11,7 @@ class MenuItem extends Model
         'parent_id',
         'page_id',
         'label',
+        'icon',
         'url',
         'target',
         'order_column',
@@ -31,9 +32,16 @@ class MenuItem extends Model
         return $this->belongsTo(MenuItem::class, 'parent_id');
     }
 
+    /** All children, including inactive — used by the admin editor. */
     public function children()
     {
         return $this->hasMany(MenuItem::class, 'parent_id')->orderBy('order_column');
+    }
+
+    /** Active-only children, eager-loadable for public rendering. */
+    public function activeChildren()
+    {
+        return $this->children()->where('is_active', true);
     }
 
     public function page()

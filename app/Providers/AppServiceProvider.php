@@ -73,7 +73,10 @@ class AppServiceProvider extends ServiceProvider
     {
         try {
             $menus = Menu::with([
-                'items' => fn ($q) => $q->where('is_active', true)->with('page'),
+                'items' => fn ($q) => $q->where('is_active', true)->with([
+                    'page',
+                    'activeChildren' => fn ($q2) => $q2->with('page'),
+                ]),
             ])->whereIn('key', ['header', 'footer', 'topbar'])->get()->keyBy('key');
 
             return [

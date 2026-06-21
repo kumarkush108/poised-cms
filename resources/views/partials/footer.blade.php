@@ -89,8 +89,15 @@
                                     $href = $item->url ?? ($item->page ? $item->page->url() : '#');
                                 @endphp
                                 <a class="btn btn-link" href="{{ $href }}" target="{{ $item->target }}">
-                                    {{ $item->label }}
+                                    @if ($item->icon)<i class="bi {{ $item->icon }} me-1"></i>@endif{{ $item->label }}
                                 </a>
+
+                                @foreach ($item->activeChildren as $child)
+                                    @php $childHref = $child->url ?? ($child->page ? $child->page->url() : '#'); @endphp
+                                    <a class="btn btn-link ms-3 small" href="{{ $childHref }}" target="{{ $child->target }}">
+                                        @if ($child->icon)<i class="bi {{ $child->icon }} me-1"></i>@endif{{ $child->label }}
+                                    </a>
+                                @endforeach
                             @endforeach
                         @else
                             <a class="btn btn-link" href="{{ route('home') }}">Home</a>

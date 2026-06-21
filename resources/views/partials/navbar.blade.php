@@ -127,11 +127,31 @@
                                     ? request()->routeIs($item->page->slug)
                                     : request()->is($item->page->slug));
                             @endphp
-                            <a href="{{ $href }}"
-                                target="{{ $item->target }}"
-                                class="nav-item nav-link {{ $isActive ? 'active' : '' }}">
-                                {{ $item->label }}
-                            </a>
+                            @if ($item->activeChildren->isNotEmpty())
+                                <div class="nav-item dropdown">
+                                    <a href="{{ $href }}"
+                                        class="nav-link dropdown-toggle {{ $isActive ? 'active' : '' }}"
+                                        data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                                        @if ($item->icon)<i class="bi {{ $item->icon }} me-1"></i>@endif{{ $item->label }}
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @foreach ($item->activeChildren as $child)
+                                            @php $childHref = $child->url ?? ($child->page ? $child->page->url() : '#'); @endphp
+                                            <li>
+                                                <a class="dropdown-item" href="{{ $childHref }}" target="{{ $child->target }}">
+                                                    @if ($child->icon)<i class="bi {{ $child->icon }} me-1"></i>@endif{{ $child->label }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @else
+                                <a href="{{ $href }}"
+                                    target="{{ $item->target }}"
+                                    class="nav-item nav-link {{ $isActive ? 'active' : '' }}">
+                                    @if ($item->icon)<i class="bi {{ $item->icon }} me-1"></i>@endif{{ $item->label }}
+                                </a>
+                            @endif
                         @endforeach
                     @else
                         <a href="{{ route('home') }}" class="nav-item nav-link">Home</a>

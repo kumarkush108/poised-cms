@@ -29,7 +29,7 @@
                             $href = $item->url ?? ($item->page ? $item->page->url() : '#');
                         @endphp
                         <a class="breadcrumb-item small text-body" href="{{ $href }}" target="{{ $item->target }}">
-                            {{ $item->label }}
+                            @if ($item->icon)<i class="bi {{ $item->icon }} me-1"></i>@endif{{ $item->label }}
                         </a>
                     @endforeach
                 @else

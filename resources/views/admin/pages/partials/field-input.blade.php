@@ -63,22 +63,10 @@
             @break
 
         @case('icon')
-            @php $iconValue = old($oldKey, $currentValue['value'] ?? ''); @endphp
-            <div class="icon-field input-group">
-                <span class="input-group-text icon-preview" data-icon-preview>
-                    @if ($iconValue)
-                        <i class="bi {{ $iconValue }}"></i>
-                    @else
-                        <i class="bi bi-question-circle text-muted"></i>
-                    @endif
-                </span>
-                <input type="text" name="{{ $inputName }}" class="form-control" data-icon-input
-                    value="{{ $iconValue }}"
-                    placeholder="e.g. bi-ev-station">
-                <button type="button" class="btn btn-outline-secondary js-icon-pick">
-                    <i class="bi bi-grid-3x3-gap"></i> Browse
-                </button>
-            </div>
+            @include('admin.partials.icon-field', [
+                'name' => $inputName,
+                'value' => old($oldKey, $currentValue['value'] ?? ''),
+            ])
             @break
 
         @case('media')
