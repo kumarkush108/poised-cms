@@ -9,38 +9,84 @@ return [
             'view' => 'pages.templates.home',
             'system_only' => true,
             'allowed_sections' => [
-                'hero', 'ev_solutions', 'stats', 'brand_logos', 'about',
-                'features', 'services_grid', 'appointment', 'testimonials',
+                'hero', 'ev_solutions', 'stats', 'brand_logos', 'about', 'features',
+                'tech_highlights', 'skill_bars', 'services_grid', 'appointment', 'testimonials',
             ],
         ],
 
         'standard_page' => [
             'label' => 'Standard Page',
             'view' => 'pages.templates.standard',
-            'allowed_sections' => ['hero', 'content', 'checklist', 'cards', 'stats', 'features', 'cta'],
+            'allowed_sections' => ['page_header', 'about_intro', 'checklist', 'cards', 'ev_highlights', 'stats', 'features', 'cta'],
         ],
 
         'service_page' => [
             'label' => 'Service Page',
             'view' => 'pages.templates.service',
-            'allowed_sections' => ['hero', 'content', 'checklist', 'services_grid', 'features', 'stats', 'cta'],
+            'allowed_sections' => ['page_header', 'content', 'checklist', 'services_grid', 'features', 'stats', 'cta'],
         ],
 
         'landing_page' => [
             'label' => 'Landing Page',
             'view' => 'pages.templates.landing',
-            'allowed_sections' => ['hero', 'content', 'checklist', 'services_grid', 'process_steps', 'cta'],
+            'allowed_sections' => ['page_header', 'content', 'checklist', 'services_grid', 'process_steps', 'cta'],
         ],
 
         'contact_page' => [
             'label' => 'Contact Page',
             'view' => 'pages.templates.contact',
-            'allowed_sections' => ['hero', 'contact_info', 'content', 'cards', 'faq', 'cta'],
+            'allowed_sections' => ['page_header', 'contact_info', 'content', 'cards', 'faq', 'cta'],
+        ],
+
+        // Reusable templates for admin-created pages. These have no hand-written
+        // Blade view — they render through the generic dynamic-page pipeline
+        // (PageController::showDynamic + resources/views/pages/dynamic.blade.php),
+        // which loops their allowed_sections and includes a generic partial per
+        // section type from resources/views/partials/dynamic-sections/.
+        'career_page' => [
+            'label' => 'Career Page',
+            'allowed_sections' => ['page_header', 'content', 'services_grid', 'faq', 'cta'],
+        ],
+
+        'support_page' => [
+            'label' => 'Support Page',
+            'allowed_sections' => ['page_header', 'content', 'faq', 'contact_info', 'cta'],
+        ],
+
+        'terms_page' => [
+            'label' => 'Terms & Conditions',
+            'allowed_sections' => ['page_header', 'content'],
+        ],
+
+        'faq_page' => [
+            'label' => 'FAQ Page',
+            'allowed_sections' => ['page_header', 'faq', 'cta'],
+        ],
+
+        'generic_page' => [
+            'label' => 'Generic Page',
+            'allowed_sections' => ['page_header', 'content', 'cards', 'checklist', 'stats', 'features', 'cta'],
+        ],
+
+        'media_gallery_page' => [
+            'label' => 'Media Gallery Page',
+            'allowed_sections' => ['page_header', 'content', 'media_gallery', 'cta'],
         ],
 
     ],
 
     'sections' => [
+
+        'page_header' => [
+            'label' => 'Page Header',
+            'view' => 'partials.sections.page-header',
+            'fields' => [
+                'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => true],
+                'subheading' => ['label' => 'Subheading', 'type' => 'string', 'required' => false],
+                'background_image' => ['label' => 'Background Image', 'type' => 'media', 'required' => false],
+            ],
+            'items' => null,
+        ],
 
         'hero' => [
             'label' => 'Hero Banner',
@@ -75,10 +121,34 @@ return [
                 'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
                 'subheading' => ['label' => 'Subheading', 'type' => 'string', 'required' => false],
                 'body' => ['label' => 'Body', 'type' => 'text', 'required' => false],
+                'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
+                'button_text' => ['label' => 'Button Text', 'type' => 'string', 'required' => false],
+                'button_url' => ['label' => 'Button URL', 'type' => 'url', 'required' => false],
+                'video_url' => ['label' => 'Background Video URL', 'type' => 'url', 'required' => false],
             ],
             'items' => [
                 'item_type' => 'solution-card',
                 'label' => 'Solution',
+                'fields' => [
+                    'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
+                    'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
+                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                    'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
+                ],
+            ],
+        ],
+
+        'ev_highlights' => [
+            'label' => 'EV Highlights',
+            'view' => 'partials.sections.ev-highlights',
+            'fields' => [
+                'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
+                'body' => ['label' => 'Body', 'type' => 'text', 'required' => false],
+                'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
+            ],
+            'items' => [
+                'item_type' => 'solution-card',
+                'label' => 'Highlight',
                 'fields' => [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
@@ -112,7 +182,11 @@ return [
                 'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
                 'subheading' => ['label' => 'Subheading', 'type' => 'string', 'required' => false],
                 'body' => ['label' => 'Body', 'type' => 'text', 'required' => false],
-                'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
+                'image' => ['label' => 'Image 1', 'type' => 'media', 'required' => false],
+                'image_2' => ['label' => 'Image 2', 'type' => 'media', 'required' => false],
+                'image_3' => ['label' => 'Image 3', 'type' => 'media', 'required' => false],
+                'badge_value' => ['label' => 'Badge Value (e.g. "25")', 'type' => 'string', 'required' => false],
+                'badge_label' => ['label' => 'Badge Label', 'type' => 'string', 'required' => false],
             ],
             'items' => [
                 'item_type' => 'stat',
@@ -138,6 +212,41 @@ return [
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
                     'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                ],
+            ],
+        ],
+
+        'tech_highlights' => [
+            'label' => 'Technology Highlights',
+            'view' => 'partials.sections.tech-highlights',
+            'fields' => [
+                'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
+                'body' => ['label' => 'Body', 'type' => 'text', 'required' => false],
+                'button_text' => ['label' => 'Button Text', 'type' => 'string', 'required' => false],
+                'button_url' => ['label' => 'Button URL', 'type' => 'url', 'required' => false],
+                'video_url' => ['label' => 'Video Embed URL', 'type' => 'url', 'required' => false],
+            ],
+            'items' => [
+                'item_type' => 'feature',
+                'label' => 'Highlight',
+                'fields' => [
+                    'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
+                    'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
+                    'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
+                ],
+            ],
+        ],
+
+        'skill_bars' => [
+            'label' => 'Skill Progress Bars',
+            'view' => 'partials.sections.skill-bars',
+            'fields' => [],
+            'items' => [
+                'item_type' => 'skill-bar',
+                'label' => 'Skill',
+                'fields' => [
+                    'label' => ['label' => 'Label', 'type' => 'string', 'required' => true],
+                    'value' => ['label' => 'Percentage (0-100)', 'type' => 'integer', 'required' => true],
                 ],
             ],
         ],
@@ -170,6 +279,9 @@ return [
                 'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
                 'subheading' => ['label' => 'Subheading', 'type' => 'string', 'required' => false],
                 'body' => ['label' => 'Body', 'type' => 'text', 'required' => false],
+                'form_heading' => ['label' => 'Form Heading', 'type' => 'string', 'required' => false],
+                'address' => ['label' => 'Office Address', 'type' => 'text', 'required' => false],
+                'office_hours' => ['label' => 'Office Hours', 'type' => 'string', 'required' => false],
             ],
             'items' => null,
         ],
@@ -179,6 +291,9 @@ return [
             'view' => 'partials.sections.testimonials',
             'fields' => [
                 'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
+                'body' => ['label' => 'Body', 'type' => 'text', 'required' => false],
+                'button_text' => ['label' => 'Button Text', 'type' => 'string', 'required' => false],
+                'button_url' => ['label' => 'Button URL', 'type' => 'url', 'required' => false],
             ],
             'items' => [
                 'item_type' => 'testimonial',
@@ -199,6 +314,18 @@ return [
             'fields' => [
                 'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
                 'body' => ['label' => 'Body', 'type' => 'richtext', 'required' => false],
+            ],
+            'items' => null,
+        ],
+
+        'about_intro' => [
+            'label' => 'Intro (with Stat Badge)',
+            'view' => 'partials.sections.about-intro',
+            'fields' => [
+                'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
+                'body' => ['label' => 'Body', 'type' => 'richtext', 'required' => false],
+                'badge_value' => ['label' => 'Badge Value (e.g. "25+")', 'type' => 'string', 'required' => false],
+                'badge_label' => ['label' => 'Badge Label', 'type' => 'string', 'required' => false],
             ],
             'items' => null,
         ],
@@ -285,9 +412,7 @@ return [
         'checklist' => [
             'label' => 'Checklist',
             'view' => 'partials.sections.checklist',
-            'fields' => [
-                'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
-            ],
+            'fields' => [],
             'items' => [
                 'item_type' => 'checklist-item',
                 'label' => 'Checklist Item',
@@ -313,6 +438,25 @@ return [
                     'icon' => ['label' => 'Icon Class', 'type' => 'string', 'required' => false],
                     'title' => ['label' => 'Title', 'type' => 'string', 'required' => true],
                     'description' => ['label' => 'Description', 'type' => 'text', 'required' => false],
+                ],
+            ],
+        ],
+
+        'media_gallery' => [
+            'label' => 'Media Gallery',
+            'view' => 'partials.dynamic-sections.media_gallery',
+            'fields' => [
+                'heading' => ['label' => 'Heading', 'type' => 'string', 'required' => false],
+                'subheading' => ['label' => 'Subheading', 'type' => 'text', 'required' => false],
+            ],
+            'items' => [
+                'item_type' => 'media-item',
+                'label' => 'Media Item',
+                'fields' => [
+                    'image' => ['label' => 'Image', 'type' => 'media', 'required' => false],
+                    'video_url' => ['label' => 'Video Embed URL (YouTube/Vimeo, leave blank for an image item)', 'type' => 'url', 'required' => false],
+                    'category' => ['label' => 'Category (used for filter buttons)', 'type' => 'string', 'required' => false],
+                    'caption' => ['label' => 'Caption', 'type' => 'string', 'required' => false],
                 ],
             ],
         ],

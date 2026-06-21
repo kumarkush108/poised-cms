@@ -55,6 +55,46 @@
             <span class="nav-text">Pages</span>
         </a>
 
+        <a class="nav-link {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.product-categories.*') ? 'active' : '' }}"
+            href="{{ route('admin.products.index') }}">
+
+            <span class="nav-icon">
+                <i class="bi bi-box-seam"></i>
+            </span>
+
+            <span class="nav-text">Products</span>
+        </a>
+
+        <a class="nav-link {{ request()->routeIs('admin.blog-posts.*') || request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}"
+            href="{{ route('admin.blog-posts.index') }}">
+
+            <span class="nav-icon">
+                <i class="bi bi-journal-text"></i>
+            </span>
+
+            <span class="nav-text">Blog</span>
+        </a>
+
+        <a class="nav-link {{ request()->routeIs('admin.news-articles.*') || request()->routeIs('admin.news-categories.*') ? 'active' : '' }}"
+            href="{{ route('admin.news-articles.index') }}">
+
+            <span class="nav-icon">
+                <i class="bi bi-newspaper"></i>
+            </span>
+
+            <span class="nav-text">News</span>
+        </a>
+
+        <a class="nav-link {{ request()->routeIs('admin.menus.*') || request()->routeIs('admin.menu-items.*') ? 'active' : '' }}"
+            href="{{ route('admin.menus.index') }}">
+
+            <span class="nav-icon">
+                <i class="bi bi-list-nested"></i>
+            </span>
+
+            <span class="nav-text">Menus</span>
+        </a>
+
         <a class="nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}"
             href="{{ route('admin.contact-messages.index') }}">
 
