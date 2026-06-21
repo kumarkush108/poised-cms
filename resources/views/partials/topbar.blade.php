@@ -23,21 +23,32 @@
             <!-- Right Links -->
             <nav class="breadcrumb mb-0">
 
-                <a class="breadcrumb-item small text-body" href="#">
-                    Career
-                </a>
+                @if ($topbarMenu && $topbarMenu->items->isNotEmpty())
+                    @foreach ($topbarMenu->items as $item)
+                        @php
+                            $href = $item->url ?? ($item->page ? $item->page->url() : '#');
+                        @endphp
+                        <a class="breadcrumb-item small text-body" href="{{ $href }}" target="{{ $item->target }}">
+                            {{ $item->label }}
+                        </a>
+                    @endforeach
+                @else
+                    <a class="breadcrumb-item small text-body" href="#">
+                        Career
+                    </a>
 
-                <a class="breadcrumb-item small text-body" href="#">
-                    Support
-                </a>
+                    <a class="breadcrumb-item small text-body" href="#">
+                        Support
+                    </a>
 
-                <a class="breadcrumb-item small text-body" href="#">
-                    Terms
-                </a>
+                    <a class="breadcrumb-item small text-body" href="#">
+                        Terms
+                    </a>
 
-                <a class="breadcrumb-item small text-body" href="#">
-                    FAQs
-                </a>
+                    <a class="breadcrumb-item small text-body" href="#">
+                        FAQs
+                    </a>
+                @endif
 
             </nav>
 

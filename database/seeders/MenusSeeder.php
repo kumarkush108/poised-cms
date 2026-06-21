@@ -12,6 +12,7 @@ class MenusSeeder extends Seeder
     {
         $header = Menu::firstOrCreate(['key' => 'header'], ['name' => 'Header Menu']);
         $footer = Menu::firstOrCreate(['key' => 'footer'], ['name' => 'Footer Menu']);
+        $topbar = Menu::firstOrCreate(['key' => 'topbar'], ['name' => 'Topbar Menu']);
 
         $items = [
             ['slug' => 'home', 'label' => 'Home'],
@@ -34,6 +35,32 @@ class MenusSeeder extends Seeder
                     ]
                 );
             }
+        }
+
+        // Topbar quick-links: Career/Support/Terms/FAQs, resolved to the real
+        // pages created by StandalonePagesSeeder (run just before this).
+        $topbarItems = [
+            ['slug' => 'career', 'label' => 'Career'],
+            ['slug' => 'support', 'label' => 'Support'],
+            ['slug' => 'terms', 'label' => 'Terms'],
+            ['slug' => 'faq', 'label' => 'FAQs'],
+        ];
+
+        foreach ($topbarItems as $index => $item) {
+            $page = Page::where('slug', $item['slug'])->first();
+
+            if (! $page) {
+                continue;
+            }
+
+            $topbar->items()->firstOrCreate(
+                ['page_id' => $page->id],
+                [
+                    'label' => $item['label'],
+                    'order_column' => $index,
+                    'is_active' => true,
+                ]
+            );
         }
     }
 }

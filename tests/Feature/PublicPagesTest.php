@@ -9,6 +9,7 @@ use App\Models\Setting;
 use Database\Seeders\MenusSeeder;
 use Database\Seeders\PagesSeeder;
 use Database\Seeders\SettingsSeeder;
+use Database\Seeders\StandalonePagesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -23,6 +24,7 @@ class PublicPagesTest extends TestCase
 
         (new SettingsSeeder())->run();
         (new PagesSeeder())->run();
+        (new StandalonePagesSeeder())->run();
         (new MenusSeeder())->run();
     }
 
@@ -443,6 +445,54 @@ class PublicPagesTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee('Unique Hidden Label');
+    }
+
+    public function test_topbar_breadcrumb_renders_menu_items_from_database(): void
+    {
+        $menu = Menu::where('key', 'topbar')->first();
+
+        $this->assertNotNull($menu, 'StandalonePagesSeeder/MenusSeeder should create a topbar menu.');
+        $this->assertSame(4, $menu->items->count());
+
+        $item = $menu->items->first();
+        $item->update(['label' => 'Unique Topbar Label']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Unique Topbar Label');
+    }
+
+    public function test_topbar_breadcrumb_links_resolve_to_real_pages_not_hash_links(): void
+    {
+        $career = Page::where('slug', 'career')->firstOrFail();
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('href="' . $career->url() . '"', false);
+        $response->assertDontSee('breadcrumb-item small text-body" href="#"', false);
+    }
+
+    public function test_topbar_breadcrumb_falls_back_to_defaults_when_no_topbar_menu_exists(): void
+    {
+        Menu::where('key', 'topbar')->delete();
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Career');
+        $response->assertSee('Support');
+        $response->assertSee('Terms');
+        $response->assertSee('FAQs');
+    }
+
+    public function test_standalone_pages_render_their_own_seeded_content(): void
+    {
+        $this->get('/career')->assertOk()->assertSee('Careers at Poised Technology');
+        $this->get('/support')->assertOk()->assertSee('Support Center');
+        $this->get('/terms')->assertOk()->assertSee('Terms & Conditions');
+        $this->get('/faq')->assertOk()->assertSee('What services does Poised Technology offer?');
     }
 
     public function test_menus_are_loaded_once_per_request(): void

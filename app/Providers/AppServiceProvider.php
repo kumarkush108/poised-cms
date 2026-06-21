@@ -44,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
             $menus = $this->app->make('cms.menus');
             $view->with('headerMenu', $menus['headerMenu']);
             $view->with('footerMenu', $menus['footerMenu']);
+            $view->with('topbarMenu', $menus['topbarMenu']);
         });
 
         $this->app->terminating(function () {
@@ -73,16 +74,18 @@ class AppServiceProvider extends ServiceProvider
         try {
             $menus = Menu::with([
                 'items' => fn ($q) => $q->where('is_active', true)->with('page'),
-            ])->whereIn('key', ['header', 'footer'])->get()->keyBy('key');
+            ])->whereIn('key', ['header', 'footer', 'topbar'])->get()->keyBy('key');
 
             return [
                 'headerMenu' => $menus->get('header'),
                 'footerMenu' => $menus->get('footer'),
+                'topbarMenu' => $menus->get('topbar'),
             ];
         } catch (\Throwable $e) {
             return [
                 'headerMenu' => null,
                 'footerMenu' => null,
+                'topbarMenu' => null,
             ];
         }
     }

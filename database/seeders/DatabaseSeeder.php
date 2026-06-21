@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SettingsSeeder::class,
             PagesSeeder::class,
+            StandalonePagesSeeder::class,
             MenusSeeder::class,
             ContentSeeder::class,
         ]);
