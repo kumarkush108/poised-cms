@@ -1,4 +1,8 @@
 <!-- Topbar Start -->
+@php
+    $topbarAddress = \App\Cms\Content::settingValue($themeSettings ?? collect(), 'address', 'F-15, First Floor, Block D 242, Sector 63, Noida-201301');
+    $topbarHours = \App\Cms\Content::settingValue($themeSettings ?? collect(), 'business_hours', 'Mon-Sat 09am-5pm, Sun Closed');
+@endphp
 <div class="container-fluid py-2 d-none d-lg-flex">
     <div class="container">
         <div class="d-flex justify-content-between">
@@ -7,12 +11,12 @@
             <div>
                 <small class="me-3">
                     <i class="fa fa-map-marker-alt me-2"></i>
-                    F-15, First Floor, Block D 242, Sector 63, Noida-201301
+                    {{ $topbarAddress }}
                 </small>
 
                 <small class="me-3">
                     <i class="fa fa-clock me-2"></i>
-                    Mon-Sat 09am-5pm, Sun Closed
+                    {{ $topbarHours }}
                 </small>
             </div>
 

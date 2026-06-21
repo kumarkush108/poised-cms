@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Media;
+use App\Models\Menu;
 use App\Models\Page;
 use App\Models\Setting;
+use Database\Seeders\MenusSeeder;
 use Database\Seeders\PagesSeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,6 +23,7 @@ class PublicPagesTest extends TestCase
 
         (new SettingsSeeder())->run();
         (new PagesSeeder())->run();
+        (new MenusSeeder())->run();
     }
 
     public function test_all_public_pages_resolve_and_render_default_content(): void
@@ -42,7 +45,7 @@ class PublicPagesTest extends TestCase
     public function test_section_field_override_replaces_default_content(): void
     {
         $about = Page::where('slug', 'about')->firstOrFail();
-        $content = $about->sections()->where('section_key', 'content')->firstOrFail();
+        $content = $about->sections()->where('section_key', 'about_intro')->firstOrFail();
 
         $content->fields()->create([
             'field_key' => 'heading',
@@ -92,7 +95,7 @@ class PublicPagesTest extends TestCase
     public function test_inactive_section_falls_back_to_default_content(): void
     {
         $about = Page::where('slug', 'about')->firstOrFail();
-        $content = $about->sections()->where('section_key', 'content')->firstOrFail();
+        $content = $about->sections()->where('section_key', 'about_intro')->firstOrFail();
 
         $content->fields()->create([
             'field_key' => 'heading',
@@ -119,7 +122,7 @@ class PublicPagesTest extends TestCase
         ]);
 
         $about = Page::where('slug', 'about')->firstOrFail();
-        $hero = $about->sections()->where('section_key', 'hero')->firstOrFail();
+        $hero = $about->sections()->where('section_key', 'page_header')->firstOrFail();
 
         $hero->fields()->create([
             'field_key' => 'background_image',
@@ -194,6 +197,81 @@ class PublicPagesTest extends TestCase
         $response->assertOk();
         $response->assertSee('id="cms-theme-overrides"', false);
         $response->assertSee('--bs-primary: #0d6efd', false);
+    }
+
+    public function test_contact_settings_render_in_topbar_navbar_and_footer(): void
+    {
+        Setting::where('group', 'general')->where('key', 'contact_phone')->update(['value' => '+1 555 0199']);
+        Setting::where('group', 'general')->where('key', 'contact_email')->update(['value' => 'hello@acme.test']);
+        Setting::where('group', 'general')->where('key', 'address')->update(['value' => '1 Acme Way, Test City']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('+1 555 0199');
+        $response->assertSee('hello@acme.test');
+        $response->assertSee('1 Acme Way, Test City');
+    }
+
+    public function test_site_name_setting_renders_when_no_logo_is_set(): void
+    {
+        Setting::where('group', 'general')->where('key', 'site_name')->update(['value' => 'Acme Corp']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Acme Corp');
+    }
+
+    public function test_social_links_render_only_when_configured(): void
+    {
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertDontSee('fa-facebook-f', false);
+
+        Setting::where('group', 'social')->where('key', 'facebook_url')->update(['value' => 'https://facebook.com/acme']);
+
+        $response = $this->get('/');
+        $response->assertOk();
+        $response->assertSee('https://facebook.com/acme', false);
+    }
+
+    public function test_footer_copyright_setting_renders_with_current_year(): void
+    {
+        Setting::where('group', 'footer')->where('key', 'copyright_text')->update(['value' => 'Acme Corp. All Rights Reserved.']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('&copy; ' . now()->year . ' Acme Corp. All Rights Reserved.', false);
+    }
+
+    public function test_seo_default_meta_description_setting_is_used_when_page_has_none(): void
+    {
+        Setting::where('group', 'seo')->where('key', 'default_meta_description')->update(['value' => 'Acme default description.']);
+
+        $support = \App\Models\Page::create([
+            'slug' => 'no-meta-page', 'title' => 'No Meta Page',
+            'template' => 'generic_page', 'is_system' => false, 'status' => 'published',
+        ]);
+        \App\Cms\PageSectionBootstrapper::run($support);
+
+        $response = $this->get('/no-meta-page');
+
+        $response->assertOk();
+        $response->assertSee('<meta name="description" content="Acme default description.">', false);
+    }
+
+    public function test_header_and_footer_custom_scripts_render_when_configured(): void
+    {
+        Setting::where('group', 'scripts')->where('key', 'header_scripts')->update(['value' => '<meta name="head-marker" content="1">']);
+        Setting::where('group', 'scripts')->where('key', 'footer_scripts')->update(['value' => '<script id="footer-marker"></script>']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('<meta name="head-marker" content="1">', false);
+        $response->assertSee('<script id="footer-marker"></script>', false);
     }
 
     public function test_page_meta_fields_render_when_present(): void
@@ -272,7 +350,7 @@ class PublicPagesTest extends TestCase
     public function test_richtext_content_is_sanitized_against_stored_xss(): void
     {
         $about = Page::where('slug', 'about')->firstOrFail();
-        $content = $about->sections()->where('section_key', 'content')->firstOrFail();
+        $content = $about->sections()->where('section_key', 'about_intro')->firstOrFail();
 
         $content->fields()->create([
             'field_key' => 'body',
@@ -291,7 +369,7 @@ class PublicPagesTest extends TestCase
     public function test_richtext_content_preserves_legitimate_formatting(): void
     {
         $about = Page::where('slug', 'about')->firstOrFail();
-        $content = $about->sections()->where('section_key', 'content')->firstOrFail();
+        $content = $about->sections()->where('section_key', 'about_intro')->firstOrFail();
 
         $content->fields()->create([
             'field_key' => 'body',
@@ -303,5 +381,81 @@ class PublicPagesTest extends TestCase
         $response->assertOk();
         $response->assertSee('<p class="mb-4">Intro <strong>bold</strong> and <a href="https://example.com" target="_blank" rel="noreferrer noopener">a link</a>.</p>', false);
         $response->assertSee('<ul><li>Point one</li><li>Point two</li></ul>', false);
+    }
+
+    public function test_navbar_renders_menu_items_from_database(): void
+    {
+        $menu = Menu::where('key', 'header')->first();
+        $item = $menu->items->first();
+        $item->update(['label' => 'Poised Home Custom']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Poised Home Custom');
+    }
+
+    public function test_navbar_link_to_an_admin_created_dynamic_page_resolves_correctly(): void
+    {
+        $dynamicPage = Page::create([
+            'slug' => 'careers',
+            'title' => 'Careers',
+            'template' => 'career_page',
+            'is_system' => false,
+            'status' => 'published',
+        ]);
+
+        $menu = Menu::where('key', 'header')->first();
+        $menu->items()->create([
+            'parent_id' => null,
+            'page_id' => $dynamicPage->id,
+            'label' => 'Careers Link',
+            'order_column' => 99,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Careers Link');
+        $response->assertSee('href="' . url('/careers') . '"', false);
+    }
+
+    public function test_footer_renders_menu_items_from_database(): void
+    {
+        $menu = Menu::where('key', 'footer')->first();
+        $item = $menu->items->first();
+        $item->update(['label' => 'Poised Footer Custom']);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Poised Footer Custom');
+    }
+
+    public function test_inactive_menu_items_are_hidden(): void
+    {
+        $menu = Menu::where('key', 'header')->first();
+        $item = $menu->items->first();
+        $item->update(['label' => 'Unique Hidden Label', 'is_active' => false]);
+
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertDontSee('Unique Hidden Label');
+    }
+
+    public function test_menus_are_loaded_once_per_request(): void
+    {
+        DB::enableQueryLog();
+
+        $this->get('/')->assertOk();
+
+        $menuQueries = collect(DB::getQueryLog())
+            ->filter(fn ($query) => str_contains($query['query'], '"menus"') || str_contains($query['query'], '`menus`'));
+
+        DB::disableQueryLog();
+
+        $this->assertCount(1, $menuQueries);
     }
 }

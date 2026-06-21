@@ -1,4 +1,20 @@
 <!-- Footer Start -->
+@php
+    $footerSettings = $themeSettings ?? collect();
+    $footerSiteName = \App\Cms\Content::settingValue($footerSettings, 'site_name', 'Poised Technology');
+    $footerTagline = \App\Cms\Content::settingValue($footerSettings, 'site_tagline', 'Delivering scalable software, cloud and EV solutions that power modern businesses.');
+    $footerAddress = \App\Cms\Content::settingValue($footerSettings, 'address', 'F-15, First Floor, Block D 242, Sector 63, Noida-201301');
+    $footerPhone = \App\Cms\Content::settingValue($footerSettings, 'contact_phone', '+012 345 67890');
+    $footerEmail = \App\Cms\Content::settingValue($footerSettings, 'contact_email', 'info@example.com');
+
+    $socialLinks = [
+        'fa-facebook-f' => \App\Cms\Content::settingValue($footerSettings, 'facebook_url'),
+        'fa-twitter' => \App\Cms\Content::settingValue($footerSettings, 'twitter_url'),
+        'fa-linkedin-in' => \App\Cms\Content::settingValue($footerSettings, 'linkedin_url'),
+        'fa-instagram' => \App\Cms\Content::settingValue($footerSettings, 'instagram_url'),
+        'fa-youtube' => \App\Cms\Content::settingValue($footerSettings, 'youtube_url'),
+    ];
+@endphp
 <div class="container-fluid footer position-relative bg-dark text-white-50 py-5 wow fadeIn"
     data-wow-delay="0.1s">
 
@@ -10,54 +26,48 @@
             <div class="col-lg-6 pe-lg-5">
 
                 <a href="{{ route('home') }}" class="navbar-brand">
-                    @if ($logoUrl = \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'logo'))
-                        <img src="{{ $logoUrl }}" alt="Poised Technology" style="max-height: 50px;">
+                    @if ($logoUrl = \App\Cms\Content::settingMediaUrl($footerSettings, 'logo'))
+                        <img src="{{ $logoUrl }}" alt="{{ $footerSiteName }}" style="max-height: 50px;">
                     @else
                         <h1 class="h1 text-primary mb-0">
-                            Poised<span class="text-white"></span>
+                            {{ $footerSiteName }}
                         </h1>
                     @endif
                 </a>
 
                 <p class="fs-5 mb-4">
-                    Delivering scalable software, cloud and EV solutions that power modern businesses.
+                    {{ $footerTagline }}
                 </p>
 
                 <p>
                     <i class="fa fa-map-marker-alt me-2"></i>
-                    F-15, First Floor, Block D 242, Sector 63, Noida-201301
+                    {{ $footerAddress }}
                 </p>
 
                 <p>
                     <i class="fa fa-phone-alt me-2"></i>
-                    +012 345 67890
+                    {{ $footerPhone }}
                 </p>
 
                 <p>
                     <i class="fa fa-envelope me-2"></i>
-                    info@example.com
+                    {{ $footerEmail }}
                 </p>
 
-                <!-- Social Icons -->
-                <div class="d-flex mt-4">
+                @if (array_filter($socialLinks))
+                    <!-- Social Icons -->
+                    <div class="d-flex mt-4">
 
-                    <a class="btn btn-lg-square btn-primary me-2" href="#">
-                        <i class="fab fa-twitter"></i>
-                    </a>
+                        @foreach ($socialLinks as $icon => $url)
+                            @if ($url)
+                                <a class="btn btn-lg-square btn-primary me-2" href="{{ $url }}" target="_blank" rel="noopener">
+                                    <i class="fab {{ $icon }}"></i>
+                                </a>
+                            @endif
+                        @endforeach
 
-                    <a class="btn btn-lg-square btn-primary me-2" href="#">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-
-                    <a class="btn btn-lg-square btn-primary me-2" href="#">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-
-                    <a class="btn btn-lg-square btn-primary me-2" href="#">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-
-                </div>
+                    </div>
+                @endif
 
             </div>
 
@@ -73,54 +83,22 @@
                             Quick Links
                         </h4>
 
-                        <a class="btn btn-link" href="#">
-                            About Us
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Contact Us
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Our Services
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Terms & Condition
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Support
-                        </a>
-
-                    </div>
-
-                    <!-- Popular Links -->
-                    <div class="col-sm-6">
-
-                        <h4 class="text-light mb-4">
-                            Popular Links
-                        </h4>
-
-                        <a class="btn btn-link" href="#">
-                            About Us
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Contact Us
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Our Services
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Terms & Condition
-                        </a>
-
-                        <a class="btn btn-link" href="#">
-                            Support
-                        </a>
+                        @if ($footerMenu && $footerMenu->items->isNotEmpty())
+                            @foreach ($footerMenu->items as $item)
+                                @php
+                                    $href = $item->url ?? ($item->page ? $item->page->url() : '#');
+                                @endphp
+                                <a class="btn btn-link" href="{{ $href }}" target="{{ $item->target }}">
+                                    {{ $item->label }}
+                                </a>
+                            @endforeach
+                        @else
+                            <a class="btn btn-link" href="{{ route('home') }}">Home</a>
+                            <a class="btn btn-link" href="{{ route('about') }}">About Us</a>
+                            <a class="btn btn-link" href="{{ route('services') }}">Our Services</a>
+                            <a class="btn btn-link" href="{{ route('solutions') }}">Solutions</a>
+                            <a class="btn btn-link" href="{{ route('contact') }}">Contact Us</a>
+                        @endif
 
                     </div>
 
@@ -172,11 +150,7 @@
             <div class="col-md-6 text-center text-md-start">
 
                 <p class="mb-0">
-                    &copy;
-                    <a href="https://www.poised.co.in/">
-                        Poised
-                    </a>.
-                    All Rights Reserved.
+                    &copy; {{ now()->year }} {{ \App\Cms\Content::settingValue($themeSettings ?? collect(), 'copyright_text', 'Poised. All Rights Reserved.') }}
                 </p>
 
             </div>

@@ -39,5 +39,74 @@ class SettingsSeeder extends Seeder
                 ['value' => null, 'media_id' => null, 'type' => 'media']
             );
         }
+
+        $general = [
+            'site_name' => 'Poised Technology',
+            'site_tagline' => 'Delivering scalable software, cloud and EV solutions that power modern businesses.',
+            'contact_phone' => '+012 345 6789',
+            'contact_phone_secondary' => null,
+            'contact_email' => 'info@example.com',
+            'contact_email_secondary' => null,
+            'address' => 'F-15, First Floor, Block D 242, Sector 63, Noida-201301',
+            'business_hours' => 'Mon-Sat 09am-5pm, Sun Closed',
+        ];
+
+        foreach ($general as $key => $value) {
+            Setting::updateOrCreate(
+                ['group' => 'general', 'key' => $key],
+                ['value' => $value, 'type' => 'text']
+            );
+        }
+
+        $social = [
+            'facebook_url' => null,
+            'twitter_url' => null,
+            'linkedin_url' => null,
+            'instagram_url' => null,
+            'youtube_url' => null,
+        ];
+
+        foreach ($social as $key => $value) {
+            Setting::updateOrCreate(
+                ['group' => 'social', 'key' => $key],
+                ['value' => $value, 'type' => 'url']
+            );
+        }
+
+        $seo = [
+            'default_meta_title' => 'Poised Technology',
+            'default_meta_description' => 'Poised Technology provides innovative IT solutions including software development, cloud infrastructure, data analytics and digital consulting.',
+            'default_meta_keywords' => 'IT Consulting, Software Development, Cloud Solutions, Digital Transformation',
+        ];
+
+        foreach ($seo as $key => $value) {
+            Setting::updateOrCreate(
+                ['group' => 'seo', 'key' => $key],
+                ['value' => $value, 'type' => 'text']
+            );
+        }
+
+        $footer = [
+            'copyright_text' => 'Poised. All Rights Reserved.',
+        ];
+
+        foreach ($footer as $key => $value) {
+            Setting::updateOrCreate(
+                ['group' => 'footer', 'key' => $key],
+                ['value' => $value, 'type' => 'text']
+            );
+        }
+
+        $scripts = [
+            'header_scripts' => null,
+            'footer_scripts' => null,
+        ];
+
+        foreach ($scripts as $key => $value) {
+            Setting::updateOrCreate(
+                ['group' => 'scripts', 'key' => $key],
+                ['value' => $value, 'type' => 'script']
+            );
+        }
     }
 }

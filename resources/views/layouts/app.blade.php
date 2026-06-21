@@ -31,6 +31,11 @@
     {{-- Per-page scripts pushed from child views --}}
     @stack('scripts')
 
+    {{-- Admin-configured tracking/analytics scripts (Settings > Advanced) --}}
+    @if ($footerScripts = \App\Cms\Content::settingValue($themeSettings ?? collect(), 'footer_scripts'))
+        {!! $footerScripts !!}
+    @endif
+
 </body>
 
 </html>

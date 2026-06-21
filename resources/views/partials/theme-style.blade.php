@@ -9,6 +9,12 @@
     $danger = \App\Cms\Content::settingValue($themeSettings, 'danger_color', '#dc3545');
     $dark = \App\Cms\Content::settingValue($themeSettings, 'dark_color', '#212529');
     $light = \App\Cms\Content::settingValue($themeSettings, 'light_color', '#f8f9fa');
+    $headerBackground = \App\Cms\Content::settingValue($themeSettings, 'header_background', '#ffffff');
+    $footerBackground = \App\Cms\Content::settingValue($themeSettings, 'footer_background', '#212529');
+    $buttonColor = \App\Cms\Content::settingValue($themeSettings, 'button_color', '#0d6efd');
+    $buttonHoverColor = \App\Cms\Content::settingValue($themeSettings, 'button_hover_color', '#0b5ed7');
+    $textColor = \App\Cms\Content::settingValue($themeSettings, 'text_color', '#212529');
+    $linkColor = \App\Cms\Content::settingValue($themeSettings, 'link_color', '#0d6efd');
 @endphp
 <style id="cms-theme-overrides">
     :root {
@@ -24,7 +30,6 @@
     .bg-primary { background-color: {{ $primary }} !important; }
     .text-primary { color: {{ $primary }} !important; }
     .border-primary { border-color: {{ $primary }} !important; }
-    .btn-primary { background-color: {{ $primary }} !important; border-color: {{ $primary }} !important; }
     .bg-secondary { background-color: {{ $secondary }} !important; }
     .text-secondary { color: {{ $secondary }} !important; }
     .border-secondary { border-color: {{ $secondary }} !important; }
@@ -38,4 +43,19 @@
     .text-dark { color: {{ $dark }} !important; }
     .bg-light { background-color: {{ $light }} !important; }
     .text-light { color: {{ $light }} !important; }
+
+    /* Header / navbar background */
+    .navbar { background-color: {{ $headerBackground }} !important; }
+
+    /* Footer + copyright bar background */
+    .footer, .copyright { background-color: {{ $footerBackground }} !important; }
+
+    /* Buttons — distinct from the general "primary" accent so a site can
+       have a brand-blue primary color but a differently-colored CTA button */
+    .btn-primary { background-color: {{ $buttonColor }} !important; border-color: {{ $buttonColor }} !important; }
+    .btn-primary:hover, .btn-primary:focus { background-color: {{ $buttonHoverColor }} !important; border-color: {{ $buttonHoverColor }} !important; }
+
+    /* Body text + links */
+    body { color: {{ $textColor }}; }
+    a { color: {{ $linkColor }}; }
 </style>

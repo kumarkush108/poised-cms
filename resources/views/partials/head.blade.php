@@ -1,8 +1,9 @@
 @php
     $seoPage = $page ?? null;
-    $seoDefaultTitle = $__env->yieldContent('title', 'Poised Technology');
-    $seoDefaultDescription = $__env->yieldContent('meta_description', 'Poised Technology provides innovative IT solutions including software development, cloud infrastructure, data analytics and digital consulting.');
-    $seoDefaultKeywords = $__env->yieldContent('meta_keywords', 'IT Consulting, Software Development, Cloud Solutions, Digital Transformation');
+    $seoSettings = $themeSettings ?? collect();
+    $seoDefaultTitle = $__env->yieldContent('title') ?: \App\Cms\Content::settingValue($seoSettings, 'default_meta_title', 'Poised Technology');
+    $seoDefaultDescription = $__env->yieldContent('meta_description') ?: \App\Cms\Content::settingValue($seoSettings, 'default_meta_description', 'Poised Technology provides innovative IT solutions including software development, cloud infrastructure, data analytics and digital consulting.');
+    $seoDefaultKeywords = $__env->yieldContent('meta_keywords') ?: \App\Cms\Content::settingValue($seoSettings, 'default_meta_keywords', 'IT Consulting, Software Development, Cloud Solutions, Digital Transformation');
 
     $seoTitle = \App\Cms\Content::pageMeta($seoPage, 'meta_title', $seoDefaultTitle);
     $seoDescription = \App\Cms\Content::pageMeta($seoPage, 'meta_description', $seoDefaultDescription);
@@ -79,3 +80,10 @@
     @include('partials.theme-style')
 
     @stack('styles')
+
+    {{-- Admin-configured tracking/analytics scripts (Settings > Advanced). Rendered
+         raw and unsanitized by design — this is an admin-trusted field, equivalent
+         to editing a template file, not user-submitted content. --}}
+    @if ($headerScripts = \App\Cms\Content::settingValue($seoSettings, 'header_scripts'))
+        {!! $headerScripts !!}
+    @endif

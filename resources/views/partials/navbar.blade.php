@@ -1,4 +1,18 @@
 <!-- Brand Start -->
+@php
+    $navbarSettings = $themeSettings ?? collect();
+    $navbarSiteName = \App\Cms\Content::settingValue($navbarSettings, 'site_name', 'Poised Technology');
+    $navbarPhone = \App\Cms\Content::settingValue($navbarSettings, 'contact_phone', '+012 345 6789');
+    $navbarEmail = \App\Cms\Content::settingValue($navbarSettings, 'contact_email', 'info@example.com');
+
+    $navbarSocialLinks = [
+        'fa-facebook-f' => \App\Cms\Content::settingValue($navbarSettings, 'facebook_url'),
+        'fa-twitter' => \App\Cms\Content::settingValue($navbarSettings, 'twitter_url'),
+        'fa-linkedin-in' => \App\Cms\Content::settingValue($navbarSettings, 'linkedin_url'),
+        'fa-instagram' => \App\Cms\Content::settingValue($navbarSettings, 'instagram_url'),
+        'fa-youtube' => \App\Cms\Content::settingValue($navbarSettings, 'youtube_url'),
+    ];
+@endphp
 <div class="container-fluid bg-primary text-white pt-4 pb-5 d-none d-lg-flex">
 
     <div class="container pb-2">
@@ -17,7 +31,7 @@
                     </h5>
 
                     <span>
-                        +012 345 6789
+                        {{ $navbarPhone }}
                     </span>
 
                 </div>
@@ -30,9 +44,9 @@
                 class="h1 text-white mb-0">
 
                 @if ($logoUrl = \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'logo'))
-                    <img src="{{ $logoUrl }}" alt="Poised Technology" style="max-height: 50px;">
+                    <img src="{{ $logoUrl }}" alt="{{ $navbarSiteName }}" style="max-height: 50px;">
                 @else
-                    Poised<span class="text-dark"></span>
+                    {{ $navbarSiteName }}
                 @endif
 
             </a>
@@ -50,7 +64,7 @@
                     </h5>
 
                     <span>
-                        info@example.com
+                        {{ $navbarEmail }}
                     </span>
 
                 </div>
@@ -77,10 +91,10 @@
                 class="navbar-brand d-lg-none">
 
                 @if ($logoUrl = \App\Cms\Content::settingMediaUrl($themeSettings ?? collect(), 'logo'))
-                    <img src="{{ $logoUrl }}" alt="Poised Technology" style="max-height: 40px;">
+                    <img src="{{ $logoUrl }}" alt="{{ $navbarSiteName }}" style="max-height: 40px;">
                 @else
                     <h1 class="text-primary m-0">
-                        Poised<span class="text-dark"></span>
+                        {{ $navbarSiteName }}
                     </h1>
                 @endif
 
@@ -105,117 +119,45 @@
                 <!-- Nav Links -->
                 <div class="navbar-nav">
 
-                    <a href="{{ route('home') }}"
-                        class="nav-item nav-link active">
-
-                        Home
-
-                    </a>
-
-                    <a href="{{ route('about') }}"
-                        class="nav-item nav-link">
-
-                        About
-
-                    </a>
-
-                    <a href="{{ route('services') }}"
-                        class="nav-item nav-link">
-
-                        Services
-
-                    </a>
-
-
-                    <!-- Dropdown -->
-                    <div class="nav-item dropdown">
-
-                        <a href="#"
-                            class="nav-link dropdown-toggle"
-                            data-bs-toggle="dropdown">
-
-                            Pages
-
-                        </a>
-
-
-                        <div class="dropdown-menu bg-light m-0">
-
-                            <a href="#"
-                                class="dropdown-item">
-
-                                Features
-
+                    @if ($headerMenu && $headerMenu->items->isNotEmpty())
+                        @foreach ($headerMenu->items as $item)
+                            @php
+                                $href = $item->url ?? ($item->page ? $item->page->url() : '#');
+                                $isActive = $item->page && ($item->page->hasNamedRoute()
+                                    ? request()->routeIs($item->page->slug)
+                                    : request()->is($item->page->slug));
+                            @endphp
+                            <a href="{{ $href }}"
+                                target="{{ $item->target }}"
+                                class="nav-item nav-link {{ $isActive ? 'active' : '' }}">
+                                {{ $item->label }}
                             </a>
+                        @endforeach
+                    @else
+                        <a href="{{ route('home') }}" class="nav-item nav-link">Home</a>
+                        <a href="{{ route('about') }}" class="nav-item nav-link">About</a>
+                        <a href="{{ route('services') }}" class="nav-item nav-link">Services</a>
+                        <a href="{{ route('solutions') }}" class="nav-item nav-link">Solutions</a>
+                        <a href="{{ route('contact') }}" class="nav-item nav-link">Contact</a>
+                    @endif
 
-                            <a href="#"
-                                class="dropdown-item">
+                </div>
 
-                                Our Team
 
-                            </a>
+                @if (array_filter($navbarSocialLinks))
+                    <!-- Social Icons -->
+                    <div class="ms-auto d-none d-lg-flex">
 
-                            <a href="#"
-                                class="dropdown-item">
-
-                                Testimonial
-
-                            </a>
-
-                        </div>
+                        @foreach ($navbarSocialLinks as $icon => $url)
+                            @if ($url)
+                                <a class="btn btn-sm-square btn-primary ms-2" href="{{ $url }}" target="_blank" rel="noopener">
+                                    <i class="fab {{ $icon }}"></i>
+                                </a>
+                            @endif
+                        @endforeach
 
                     </div>
-
-
-                    <a href="{{ route('solutions') }}"
-                        class="nav-item nav-link">
-
-                        Solutions
-
-                    </a>
-
-                    <a href="{{ route('contact') }}"
-                        class="nav-item nav-link">
-
-                        Contact
-
-                    </a>
-
-                </div>
-
-
-                <!-- Social Icons -->
-                <div class="ms-auto d-none d-lg-flex">
-
-                    <a class="btn btn-sm-square btn-primary ms-2"
-                        href="#">
-
-                        <i class="fab fa-facebook-f"></i>
-
-                    </a>
-
-                    <a class="btn btn-sm-square btn-primary ms-2"
-                        href="#">
-
-                        <i class="fab fa-twitter"></i>
-
-                    </a>
-
-                    <a class="btn btn-sm-square btn-primary ms-2"
-                        href="#">
-
-                        <i class="fab fa-linkedin-in"></i>
-
-                    </a>
-
-                    <a class="btn btn-sm-square btn-primary ms-2"
-                        href="#">
-
-                        <i class="fab fa-youtube"></i>
-
-                    </a>
-
-                </div>
+                @endif
 
             </div>
 
