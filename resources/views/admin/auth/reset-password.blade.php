@@ -6,9 +6,9 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="description" content="Forgot Password | Poised Technology Admin">
+    <meta name="description" content="Reset Password | Poised Technology Admin">
 
-    <title>Forgot Password | Poised Admin</title>
+    <title>Reset Password | Poised Admin</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{{ asset('admin/assets/css/bootstrap.min.css') }}">
@@ -20,12 +20,12 @@
     <link rel="stylesheet" href="{{ asset('admin/assets/css/style.css') }}">
 
     <style>
-        .forgot-card {
+        .reset-card {
             max-width: 500px;
             width: 100%;
         }
 
-        .forgot-icon {
+        .reset-icon {
             width: 90px;
             height: 90px;
             margin: auto;
@@ -36,7 +36,7 @@
             justify-content: center;
         }
 
-        .forgot-icon i {
+        .reset-icon i {
             font-size: 40px;
             color: #0d6efd;
         }
@@ -58,7 +58,7 @@
 
     <main class="auth-page">
 
-        <section class="auth-card forgot-card">
+        <section class="auth-card reset-card">
 
             <!-- Brand -->
             <a class="auth-brand mb-4"
@@ -76,8 +76,8 @@
             </a>
 
             <!-- Icon -->
-            <div class="forgot-icon mb-4">
-                <i class="bi bi-shield-lock"></i>
+            <div class="reset-icon mb-4">
+                <i class="bi bi-key"></i>
             </div>
 
             <!-- Heading -->
@@ -88,21 +88,21 @@
                 </p>
 
                 <h1 class="h3 mb-2">
-                    Forgot Password?
+                    Reset Password
                 </h1>
 
                 <p class="text-muted mb-0">
-                    Enter your registered email address and we’ll send you a password reset link.
+                    Enter your new password below.
                 </p>
 
             </div>
 
-            <!-- Status Message -->
-            @if(session('status'))
+            <!-- Broker error (invalid / expired token) -->
+            @if ($errors->has('email') && !$errors->has('password'))
 
-                <div class="alert alert-success">
+                <div class="alert alert-danger">
 
-                    {{ session('status') }}
+                    {{ $errors->first('email') }}
 
                 </div>
 
@@ -110,19 +110,23 @@
 
             <!-- Form -->
             <form method="POST"
-                action="{{ route('admin.password.email') }}"
+                action="{{ route('admin.password.update') }}"
                 class="needs-validation"
                 novalidate>
 
                 @csrf
 
+                <input type="hidden" name="token" value="{{ $token }}">
+
+                @error('token')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                @enderror
+
                 <!-- Email -->
-                <div class="mb-4">
+                <div class="mb-3">
 
                     <label class="form-label" for="email">
-
                         Email Address
-
                     </label>
 
                     <div class="input-group">
@@ -136,20 +140,68 @@
                             id="email"
                             name="email"
                             placeholder="Enter your email"
-                            value="{{ old('email') }}"
+                            value="{{ old('email', $email ?? '') }}"
                             required>
 
                     </div>
 
                     @error('email')
-
-                        <div class="text-danger small mt-1">
-
-                            {{ $message }}
-
-                        </div>
-
+                        <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
+
+                </div>
+
+                <!-- New Password -->
+                <div class="mb-3">
+
+                    <label class="form-label" for="password">
+                        New Password
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+
+                        <input type="password"
+                            class="form-control @error('password') is-invalid @enderror"
+                            id="password"
+                            name="password"
+                            placeholder="At least 8 characters"
+                            minlength="8"
+                            required>
+
+                    </div>
+
+                    @error('password')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-4">
+
+                    <label class="form-label" for="password_confirmation">
+                        Confirm New Password
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+
+                        <input type="password"
+                            class="form-control"
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            placeholder="Repeat new password"
+                            minlength="8"
+                            required>
+
+                    </div>
 
                 </div>
 
@@ -157,9 +209,9 @@
                 <button type="submit"
                     class="btn btn-primary w-100 py-2">
 
-                    <i class="bi bi-send"></i>
+                    <i class="bi bi-check-circle"></i>
 
-                    Send Reset Link
+                    Reset Password
 
                 </button>
 
