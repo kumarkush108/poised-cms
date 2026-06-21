@@ -145,6 +145,42 @@ class PageManagementTest extends TestCase
         $this->assertTrue($section->is_active);
     }
 
+    public function test_url_field_accepts_relative_path_and_mailto_link_without_changing_them(): void
+    {
+        // Regression test: button_url/link_url fields are commonly seeded with
+        // site-relative paths ("/contact") or mailto: links rather than fully
+        // qualified URLs. Laravel's built-in "url" validation rule rejects
+        // both, which previously made it impossible to re-save a section that
+        // already had one of these values without first changing it.
+        $user = User::factory()->create();
+        $about = Page::where('slug', 'about')->first();
+        $section = $about->sections()->where('section_key', 'cta')->firstOrFail();
+
+        $section->fields()->updateOrCreate(['field_key' => 'button_url'], ['value' => '/contact']);
+
+        $response = $this->actingAs($user)->patch(route('admin.page-sections.update', $section), [
+            'fields' => [
+                'heading' => 'Existing Heading',
+                'button_url' => '/contact',
+            ],
+            'is_active' => '1',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertSame('/contact', $section->fields()->where('field_key', 'button_url')->first()->value);
+
+        $response2 = $this->actingAs($user)->patch(route('admin.page-sections.update', $section), [
+            'fields' => [
+                'heading' => 'Existing Heading',
+                'button_url' => 'mailto:info@poisedtechnology.com',
+            ],
+            'is_active' => '1',
+        ]);
+
+        $response2->assertSessionHasNoErrors();
+        $this->assertSame('mailto:info@poisedtechnology.com', $section->fields()->where('field_key', 'button_url')->first()->value);
+    }
+
     public function test_section_field_update_requires_required_fields(): void
     {
         $user = User::factory()->create();

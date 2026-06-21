@@ -1616,3 +1616,336 @@ html[data-theme="dark"] {
   border-top-color: var(--admin-sidebar-border);
   color: var(--admin-sidebar-text);
 }
+
+/* ============================================================
+   Phase K.1 — Page Editor UX
+   ============================================================ */
+
+/* ---------- Accordion section headers ---------- */
+
+.accordion-section-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s;
+}
+
+.accordion-section-header:has(+ .collapse.show) {
+  border-bottom-color: var(--admin-border);
+}
+
+.sticky-section-header {
+  position: sticky;
+  top: 72px;         /* clears the admin navbar (56px) + a little breathing room */
+  z-index: 100;
+  background: var(--admin-surface);
+  border-radius: var(--bs-card-inner-border-radius, .375rem) var(--bs-card-inner-border-radius, .375rem) 0 0;
+}
+
+.accordion-toggle {
+  color: inherit;
+  cursor: pointer;
+  min-height: 2rem;
+}
+
+.accordion-toggle:focus-visible {
+  outline: 2px solid var(--admin-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Chevron rotation */
+.accordion-chevron {
+  font-size: .8rem;
+  transition: transform .2s ease;
+  flex-shrink: 0;
+}
+
+.accordion-toggle[aria-expanded="true"] .accordion-chevron,
+[data-bs-toggle="collapse"][aria-expanded="true"] .accordion-chevron {
+  transform: rotate(90deg);
+}
+
+.accordion-chevron-sm {
+  font-size: .7rem;
+  transition: transform .2s ease;
+  flex-shrink: 0;
+}
+
+.item-toggle[aria-expanded="true"] .accordion-chevron-sm {
+  transform: rotate(90deg);
+}
+
+/* ---------- Item cards ---------- */
+
+.item-card {
+  background: var(--admin-surface);
+}
+
+.item-card-header {
+  background: var(--admin-bg);
+  border-radius: calc(var(--bs-border-radius) - 1px) calc(var(--bs-border-radius) - 1px) 0 0;
+  min-height: 2.75rem;
+}
+
+.item-card:has(> .item-card-header + .collapse.show) .item-card-header {
+  border-bottom: 1px solid var(--admin-border);
+  border-radius: calc(var(--bs-border-radius) - 1px) calc(var(--bs-border-radius) - 1px) 0 0;
+}
+
+.item-toggle {
+  color: inherit;
+  cursor: pointer;
+}
+
+.item-toggle:focus-visible {
+  outline: 2px solid var(--admin-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.item-summary-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40ch;
+}
+
+/* xs button (smaller than btn-sm) */
+.btn-xs {
+  padding: .15rem .4rem;
+  font-size: .75rem;
+  line-height: 1.4;
+  border-radius: .2rem;
+}
+
+/* ---------- Media field component ---------- */
+
+.media-field {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.media-field-preview {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .5rem;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: .375rem;
+}
+
+.media-field-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: .25rem;
+  flex-shrink: 0;
+  background: var(--admin-border);
+}
+
+.media-field-meta {
+  display: flex;
+  flex-direction: column;
+  gap: .125rem;
+  min-width: 0;
+}
+
+.media-field-filename {
+  font-size: .8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-field-alt {
+  font-size: .75rem;
+}
+
+.media-field-empty {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border: 1px dashed var(--admin-border);
+  border-radius: .375rem;
+  color: var(--admin-muted);
+}
+
+.media-field-empty .bi {
+  font-size: 1.1rem;
+}
+
+/* ---------- Media picker modal grid ---------- */
+
+.media-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: .625rem;
+}
+
+.media-picker-item {
+  position: relative;
+  cursor: pointer;
+  border-radius: .375rem;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color .15s, transform .1s;
+  aspect-ratio: 1;
+  background: var(--admin-bg);
+}
+
+.media-picker-item:hover {
+  border-color: var(--admin-primary);
+  transform: translateY(-1px);
+}
+
+.media-picker-item.selected {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-primary) 25%, transparent);
+}
+
+.media-picker-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-picker-item .media-picker-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  font-size: .65rem;
+  padding: .2rem .35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.media-picker-item:hover .media-picker-name {
+  opacity: 1;
+}
+
+.media-picker-empty {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Richtext editor (Tiptap) ---------- */
+
+.richtext-wrapper {
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .375rem;
+  overflow: hidden;
+}
+
+.richtext-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .125rem;
+  padding: .4rem .5rem;
+  background: var(--admin-bg);
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.richtext-toolbar button {
+  padding: .2rem .45rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+  cursor: pointer;
+  font-size: .85rem;
+  line-height: 1;
+  color: var(--admin-text);
+  transition: background .1s, border-color .1s;
+}
+
+.richtext-toolbar button:hover {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+}
+
+.richtext-toolbar button.is-active {
+  background: var(--admin-primary);
+  border-color: var(--admin-primary);
+  color: #fff;
+}
+
+.richtext-toolbar .toolbar-sep {
+  width: 1px;
+  background: var(--admin-border);
+  margin: .15rem .25rem;
+  align-self: stretch;
+}
+
+.richtext-editor {
+  padding: .625rem .875rem;
+  min-height: 140px;
+  outline: none;
+  font-size: .9375rem;
+  line-height: 1.6;
+  color: var(--admin-text);
+}
+
+.richtext-editor p { margin-bottom: .5em; }
+.richtext-editor h2 { font-size: 1.2em; font-weight: 700; margin-bottom: .4em; }
+.richtext-editor h3 { font-size: 1.05em; font-weight: 700; margin-bottom: .4em; }
+.richtext-editor ul,
+.richtext-editor ol  { padding-left: 1.4em; margin-bottom: .5em; }
+.richtext-editor a   { color: var(--admin-primary); }
+.richtext-editor strong { font-weight: 700; }
+
+.richtext-editor .ProseMirror-focused { outline: none; }
+
+/* ---------- Icon field preview ---------- */
+
+.icon-preview {
+  min-width: 2.5rem;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: color .15s;
+}
+
+/* ---------- Dashboard quick actions ---------- */
+
+.quick-action {
+  transition: background .15s, border-color .15s;
+  border-color: var(--admin-border) !important;
+}
+
+.quick-action:hover {
+  background: var(--admin-bg) !important;
+  border-color: var(--admin-primary) !important;
+}
+
+/* ---------- Metric card sub-text ---------- */
+
+.metric-sub {
+  font-size: .75rem;
+  margin-top: .25rem;
+}
+
+/* ---------- Page heading icon ---------- */
+
+.page-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: .5rem;
+  background: color-mix(in srgb, var(--admin-primary) 12%, transparent);
+  color: var(--admin-primary);
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}

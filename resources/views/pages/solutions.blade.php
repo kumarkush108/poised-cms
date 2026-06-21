@@ -11,7 +11,7 @@
     @php
         use App\Cms\Content;
 
-        $heroSection = $sections['hero'] ?? null;
+        $heroSection = $sections['page_header'] ?? null;
         $heroHeading = Content::field($heroSection, 'heading', 'Our Solutions');
         $heroSubheading = Content::field($heroSection, 'subheading', 'Smart technology solutions engineered for scalable businesses and future mobility.');
         $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-1.png'));
@@ -88,7 +88,12 @@
                             <div class="col-sm-6">
                                 <div class="d-flex align-items-center">
                                     <i class="bi {{ Content::itemField($item, 'icon', 'bi-check-circle-fill') }} text-primary me-3 fs-4"></i>
-                                    <span>{{ Content::itemField($item, 'text') }}</span>
+                                    <div>
+                                        <span>{{ Content::itemField($item, 'text') }}</span>
+                                        @if ($description = Content::itemField($item, 'description'))
+                                            <br><small class="text-muted">{!! Content::richtext($description) !!}</small>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -153,9 +158,7 @@
                                 {{ Content::itemField($service, 'title') }}
                             </h4>
 
-                            <p class="mb-4">
-                                {{ Content::itemField($service, 'description') }}
-                            </p>
+                            <div class="mb-4">{!! Content::richtext(Content::itemField($service, 'description')) !!}</div>
 
                             @if (! empty($highlights))
                                 <ul class="list-unstyled">
@@ -166,6 +169,11 @@
                                         </li>
                                     @endforeach
                                 </ul>
+                            @endif
+
+                            @if ($serviceLinkText = Content::itemField($service, 'link_text'))
+                                <a class="btn btn-light px-3 mt-2" href="{{ Content::itemField($service, 'link_url', '') }}">{{ $serviceLinkText }}<i
+                                        class="bi bi-chevron-double-right ms-1"></i></a>
                             @endif
 
                         </div>
@@ -184,12 +192,13 @@
         $processSection = $sections['process_steps'] ?? null;
         $processHeading = Content::field($processSection, 'heading', 'Our Working Process');
         $processSubheading = Content::field($processSection, 'subheading', 'A streamlined approach focused on innovation, efficiency and successful project delivery.');
-        $processSteps = Content::items($processSection, [
-            ['step_number' => '01', 'title' => 'Discovery', 'description' => 'Understanding business goals, challenges and technical requirements.', '_delay' => '0.1s'],
-            ['step_number' => '02', 'title' => 'Planning', 'description' => 'Designing scalable architecture and solution strategies.', '_delay' => '0.3s'],
-            ['step_number' => '03', 'title' => 'Development', 'description' => 'Agile development focused on quality, speed and performance.', '_delay' => '0.5s'],
-            ['step_number' => '04', 'title' => 'Deployment', 'description' => 'Secure deployment, optimization and continuous support.', '_delay' => '0.7s'],
+        $processSteps  = Content::items($processSection, [
+            ['step_number' => '01', 'title' => 'Discovery',   'description' => 'Understanding business goals, challenges and technical requirements.'],
+            ['step_number' => '02', 'title' => 'Planning',    'description' => 'Designing scalable architecture and solution strategies.'],
+            ['step_number' => '03', 'title' => 'Development', 'description' => 'Agile development focused on quality, speed and performance.'],
+            ['step_number' => '04', 'title' => 'Deployment',  'description' => 'Secure deployment, optimization and continuous support.'],
         ]);
+        $processDelays = ['0.1s', '0.3s', '0.5s', '0.7s'];
     @endphp
 
     <!-- Process Section Start -->
@@ -212,8 +221,8 @@
 
             <div class="row g-4 text-center">
 
-                @foreach ($processSteps as $step)
-                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ Content::itemField($step, '_delay', '0.1s') }}">
+                @foreach ($processSteps as $pIdx => $step)
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ $processDelays[$pIdx] ?? '0.1s' }}">
 
                         <div class="p-4 border rounded h-100">
 
@@ -221,9 +230,7 @@
 
                             <h5>{{ Content::itemField($step, 'title') }}</h5>
 
-                            <p>
-                                {{ Content::itemField($step, 'description') }}
-                            </p>
+                            <div>{!! Content::richtext(Content::itemField($step, 'description')) !!}</div>
 
                         </div>
 
@@ -253,9 +260,7 @@
                 {{ $ctaHeading }}
             </h1>
 
-            <p class="fs-5 mb-4 wow fadeInUp">
-                {{ $ctaBody }}
-            </p>
+            <div class="fs-5 mb-4 wow fadeInUp">{!! Content::richtext($ctaBody) !!}</div>
 
             <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-light py-3 px-5 wow fadeInUp">

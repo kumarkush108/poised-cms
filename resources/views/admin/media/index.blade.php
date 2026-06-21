@@ -84,7 +84,7 @@
                 <div class="card-body">
 
                     @if (str_starts_with($item->mime_type, 'image/'))
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk($item->disk)->url($item->path) }}"
+                        <img src="{{ $item->url }}"
                             alt="{{ $item->alt_text ?? $item->filename }}"
                             class="img-fluid rounded mb-2"
                             style="aspect-ratio: 1 / 1; object-fit: cover; width: 100%;">

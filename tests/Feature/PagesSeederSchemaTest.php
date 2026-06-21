@@ -25,7 +25,7 @@ class PagesSeederSchemaTest extends TestCase
         $sectionKeys = $home->sections->pluck('section_key')->all();
 
         $this->assertSame(
-            ['hero', 'ev_solutions', 'stats', 'brand_logos', 'about', 'features', 'services_grid', 'appointment', 'testimonials'],
+            ['hero', 'ev_solutions', 'stats', 'brand_logos', 'about', 'features', 'tech_highlights', 'skill_bars', 'services_grid', 'appointment', 'testimonials'],
             $sectionKeys
         );
 
@@ -35,12 +35,16 @@ class PagesSeederSchemaTest extends TestCase
         $this->assertCount(3, $home->sections->firstWhere('section_key', 'brand_logos')->items);
         $this->assertCount(3, $home->sections->firstWhere('section_key', 'about')->items);
         $this->assertCount(4, $home->sections->firstWhere('section_key', 'features')->items);
+        $this->assertCount(2, $home->sections->firstWhere('section_key', 'tech_highlights')->items);
+        $this->assertCount(3, $home->sections->firstWhere('section_key', 'skill_bars')->items);
         $this->assertCount(8, $home->sections->firstWhere('section_key', 'services_grid')->items);
         $this->assertCount(2, $home->sections->firstWhere('section_key', 'testimonials')->items);
 
         $this->assertSame('hero-slide', $home->sections->firstWhere('section_key', 'hero')->items->first()->item_type);
         $this->assertSame('stat', $home->sections->firstWhere('section_key', 'stats')->items->first()->item_type);
         $this->assertSame('stat', $home->sections->firstWhere('section_key', 'about')->items->first()->item_type);
+        $this->assertSame('feature', $home->sections->firstWhere('section_key', 'tech_highlights')->items->first()->item_type);
+        $this->assertSame('skill-bar', $home->sections->firstWhere('section_key', 'skill_bars')->items->first()->item_type);
     }
 
     public function test_about_page_has_aligned_sections_and_items(): void
@@ -48,16 +52,18 @@ class PagesSeederSchemaTest extends TestCase
         $about = Page::where('slug', 'about')->first();
 
         $this->assertSame(
-            ['hero', 'content', 'checklist', 'cards', 'stats', 'features', 'cta'],
+            ['page_header', 'about_intro', 'checklist', 'cards', 'ev_highlights', 'stats', 'features', 'cta'],
             $about->sections->pluck('section_key')->all()
         );
 
         $this->assertCount(2, $about->sections->firstWhere('section_key', 'checklist')->items);
         $this->assertCount(2, $about->sections->firstWhere('section_key', 'cards')->items);
+        $this->assertCount(2, $about->sections->firstWhere('section_key', 'ev_highlights')->items);
         $this->assertCount(4, $about->sections->firstWhere('section_key', 'stats')->items);
         $this->assertCount(3, $about->sections->firstWhere('section_key', 'features')->items);
         $this->assertSame('checklist-item', $about->sections->firstWhere('section_key', 'checklist')->items->first()->item_type);
         $this->assertSame('info-card', $about->sections->firstWhere('section_key', 'cards')->items->first()->item_type);
+        $this->assertSame('solution-card', $about->sections->firstWhere('section_key', 'ev_highlights')->items->first()->item_type);
     }
 
     public function test_services_page_has_aligned_sections_and_items(): void
@@ -65,7 +71,7 @@ class PagesSeederSchemaTest extends TestCase
         $services = Page::where('slug', 'services')->first();
 
         $this->assertSame(
-            ['hero', 'content', 'checklist', 'services_grid', 'features', 'stats', 'cta'],
+            ['page_header', 'content', 'checklist', 'services_grid', 'features', 'stats', 'cta'],
             $services->sections->pluck('section_key')->all()
         );
 
@@ -80,7 +86,7 @@ class PagesSeederSchemaTest extends TestCase
         $solutions = Page::where('slug', 'solutions')->first();
 
         $this->assertSame(
-            ['hero', 'content', 'checklist', 'services_grid', 'process_steps', 'cta'],
+            ['page_header', 'content', 'checklist', 'services_grid', 'process_steps', 'cta'],
             $solutions->sections->pluck('section_key')->all()
         );
 
@@ -95,7 +101,7 @@ class PagesSeederSchemaTest extends TestCase
         $contact = Page::where('slug', 'contact')->first();
 
         $this->assertSame(
-            ['hero', 'contact_info', 'content', 'cards', 'faq', 'cta'],
+            ['page_header', 'contact_info', 'content', 'cards', 'faq', 'cta'],
             $contact->sections->pluck('section_key')->all()
         );
 
@@ -113,7 +119,7 @@ class PagesSeederSchemaTest extends TestCase
 
         $home = Page::where('slug', 'home')->first();
 
-        $this->assertCount(9, $home->sections);
+        $this->assertCount(11, $home->sections);
         $this->assertCount(3, $home->sections->firstWhere('section_key', 'hero')->items);
     }
 }

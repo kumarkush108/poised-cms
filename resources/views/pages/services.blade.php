@@ -11,7 +11,7 @@
     @php
         use App\Cms\Content;
 
-        $heroSection = $sections['hero'] ?? null;
+        $heroSection = $sections['page_header'] ?? null;
         $heroHeading = Content::field($heroSection, 'heading', 'Our Services');
         $heroSubheading = Content::field($heroSection, 'subheading', 'Delivering scalable digital solutions and next-generation EV technology services.');
         $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-2.png'));
@@ -95,7 +95,12 @@
                             <div class="col-sm-6">
                                 <div class="d-flex align-items-center">
                                     <i class="bi {{ Content::itemField($item, 'icon', 'bi-check-circle-fill') }} text-primary me-3"></i>
-                                    <span>{{ Content::itemField($item, 'text') }}</span>
+                                    <div>
+                                        <span>{{ Content::itemField($item, 'text') }}</span>
+                                        @if ($description = Content::itemField($item, 'description'))
+                                            <br><small class="text-muted">{!! Content::richtext($description) !!}</small>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -160,9 +165,7 @@
                                 {{ Content::itemField($service, 'title') }}
                             </h4>
 
-                            <p class="mb-4">
-                                {{ Content::itemField($service, 'description') }}
-                            </p>
+                            <div class="mb-4">{!! Content::richtext(Content::itemField($service, 'description')) !!}</div>
 
                             @if (! empty($highlights))
                                 <ul class="list-unstyled small">
@@ -173,6 +176,11 @@
                                         </li>
                                     @endforeach
                                 </ul>
+                            @endif
+
+                            @if ($serviceLinkText = Content::itemField($service, 'link_text'))
+                                <a class="btn btn-light px-3 mt-2" href="{{ Content::itemField($service, 'link_url', '') }}">{{ $serviceLinkText }}<i
+                                        class="bi bi-chevron-double-right ms-1"></i></a>
                             @endif
 
                         </div>
@@ -192,11 +200,12 @@
         $featuresHeading = Content::field($featuresSection, 'heading', 'Why Businesses Choose Us');
         $featuresSubheading = Content::field($featuresSection, 'subheading', 'We combine innovation, engineering expertise and scalable infrastructure to deliver reliable business solutions.');
         $features = Content::items($featuresSection, [
-            ['icon' => 'bi-lightbulb', 'title' => 'Innovation First', 'description' => 'Building modern digital ecosystems with future-ready technologies.', '_delay' => '0.1s'],
-            ['icon' => 'bi-people', 'title' => 'Expert Team', 'description' => 'Experienced engineers focused on quality and scalable architecture.', '_delay' => '0.3s'],
-            ['icon' => 'bi-bar-chart', 'title' => 'Scalable Systems', 'description' => 'Solutions engineered to grow with your business operations.', '_delay' => '0.5s'],
-            ['icon' => 'bi-headset', 'title' => '24/7 Support', 'description' => 'Reliable support and monitoring for uninterrupted performance.', '_delay' => '0.7s'],
+            ['icon' => 'bi-lightbulb', 'title' => 'Innovation First',  'description' => 'Building modern digital ecosystems with future-ready technologies.'],
+            ['icon' => 'bi-people',    'title' => 'Expert Team',        'description' => 'Experienced engineers focused on quality and scalable architecture.'],
+            ['icon' => 'bi-bar-chart', 'title' => 'Scalable Systems',   'description' => 'Solutions engineered to grow with your business operations.'],
+            ['icon' => 'bi-headset',   'title' => '24/7 Support',       'description' => 'Reliable support and monitoring for uninterrupted performance.'],
         ]);
+        $featuresDelays = ['0.1s', '0.3s', '0.5s', '0.7s'];
     @endphp
 
     <!-- Why Choose Us Start -->
@@ -219,8 +228,8 @@
 
             <div class="row g-4">
 
-                @foreach ($features as $feature)
-                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ Content::itemField($feature, '_delay', '0.1s') }}">
+                @foreach ($features as $fIdx => $feature)
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ $featuresDelays[$fIdx] ?? '0.1s' }}">
 
                         <div class="feature-item border rounded p-4 h-100 text-center">
 
@@ -230,9 +239,7 @@
 
                             <h5>{{ Content::itemField($feature, 'title') }}</h5>
 
-                            <p class="mb-0">
-                                {{ Content::itemField($feature, 'description') }}
-                            </p>
+                            <div class="mb-0">{!! Content::richtext(Content::itemField($feature, 'description')) !!}</div>
 
                         </div>
 
@@ -248,12 +255,15 @@
 
     @php
         $statsSection = $sections['stats'] ?? null;
-        $stats = Content::items($statsSection, [
-            ['label' => 'Projects Delivered', 'value' => '100+', '_delay' => '0.1s'],
-            ['label' => 'Business Clients', 'value' => '50+', '_delay' => '0.3s'],
-            ['label' => 'System Uptime', 'value' => '99%', '_delay' => '0.5s'],
-            ['label' => 'Technical Support', 'value' => '24/7', '_delay' => '0.7s'],
+        $statsHeading = Content::field($statsSection, 'heading');
+        $statsSubheading = Content::field($statsSection, 'subheading');
+        $stats       = Content::items($statsSection, [
+            ['label' => 'Projects Delivered', 'value' => '100+'],
+            ['label' => 'Business Clients',   'value' => '50+'],
+            ['label' => 'System Uptime',      'value' => '99%'],
+            ['label' => 'Technical Support',  'value' => '24/7'],
         ]);
+        $statsDelays = ['0.1s', '0.3s', '0.5s', '0.7s'];
 
         $ctaSection = $sections['cta'] ?? null;
         $ctaHeading = Content::field($ctaSection, 'heading', 'Ready to Transform Your Business?');
@@ -266,10 +276,19 @@
     <div class="container-fluid py-5 bg-primary">
         <div class="container">
 
+            @if ($statsHeading)
+                <div class="text-center text-white mx-auto mb-4" style="max-width: 600px;">
+                    <h2 class="text-white mb-2">{{ $statsHeading }}</h2>
+                    @if ($statsSubheading)
+                        <p class="text-white-50 mb-0">{{ $statsSubheading }}</p>
+                    @endif
+                </div>
+            @endif
+
             <div class="row text-center text-white g-4">
 
-                @foreach ($stats as $stat)
-                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ Content::itemField($stat, '_delay', '0.1s') }}">
+                @foreach ($stats as $sIdx => $stat)
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="{{ $statsDelays[$sIdx] ?? '0.1s' }}">
 
                         <h1 class="display-4 text-white">{{ Content::itemField($stat, 'value') }}</h1>
                         <p class="mb-0">{{ Content::itemField($stat, 'label') }}</p>
@@ -292,9 +311,7 @@
                 {{ $ctaHeading }}
             </h1>
 
-            <p class="fs-5 mb-4 wow fadeInUp">
-                {{ $ctaBody }}
-            </p>
+            <div class="fs-5 mb-4 wow fadeInUp">{!! Content::richtext($ctaBody) !!}</div>
 
             <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-primary py-3 px-5 wow fadeInUp">

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Cms\PageRevisionService;
+use App\Cms\PageSectionBootstrapper;
 use App\Cms\TemplateRegistry;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Page;
+use App\Models\PageRevision;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PageController extends Controller
 {
@@ -15,6 +19,58 @@ class PageController extends Controller
         $pages = Page::with('sections')->orderBy('title')->get();
 
         return view('admin.pages.index', compact('pages'));
+    }
+
+    public function create()
+    {
+        return view('admin.pages.create', [
+            'templates' => TemplateRegistry::pageTemplates(forNewPage: true),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $templateKeys = array_keys(TemplateRegistry::pageTemplates(forNewPage: true));
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'slug' => [
+                'required', 'string', 'max:255',
+                'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
+                'unique:pages,slug',
+                Rule::notIn(['admin', 'storage', 'login', 'logout', 'api']),
+            ],
+            'template' => ['required', 'string', Rule::in($templateKeys)],
+        ], [
+            'slug.regex' => 'The slug may only contain lowercase letters, numbers, and hyphens.',
+            'slug.not_in' => 'That slug is reserved and cannot be used.',
+        ]);
+
+        $page = Page::create([
+            'slug' => $validated['slug'],
+            'title' => $validated['title'],
+            'template' => $validated['template'],
+            'is_system' => false,
+            'status' => 'draft',
+        ]);
+
+        PageSectionBootstrapper::run($page);
+
+        PageRevisionService::record($page, 'Page created');
+
+        return redirect()->route('admin.pages.edit', $page)
+            ->with('success', 'Page created. Add your content below, then publish it from Page Details when ready.');
+    }
+
+    public function destroy(Page $page)
+    {
+        try {
+            $page->delete();
+        } catch (\RuntimeException $e) {
+            return redirect()->route('admin.pages.index')->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('admin.pages.index')->with('success', 'Page deleted successfully.');
     }
 
     public function edit(Page $page)
@@ -52,6 +108,27 @@ class PageController extends Controller
 
         $page->update($validated);
 
+        PageRevisionService::record($page, 'Page details updated');
+
         return back()->with('success', 'Page details updated successfully.');
+    }
+
+    public function history(Page $page)
+    {
+        $revisions = $page->revisions()->with('createdBy')->paginate(20);
+
+        return view('admin.pages.history', [
+            'page' => $page,
+            'revisions' => $revisions,
+        ]);
+    }
+
+    public function restoreRevision(Page $page, PageRevision $revision)
+    {
+        abort_if($revision->page_id !== $page->id, 404);
+
+        PageRevisionService::restore($revision);
+
+        return redirect()->route('admin.pages.edit', $page)->with('success', 'Revision restored successfully.');
     }
 }

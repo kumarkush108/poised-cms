@@ -11,7 +11,7 @@
     @php
         use App\Cms\Content;
 
-        $heroSection = $sections['hero'] ?? null;
+        $heroSection = $sections['page_header'] ?? null;
         $heroHeading = Content::field($heroSection, 'heading', 'About Us');
         $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-1.png'));
     @endphp
@@ -43,6 +43,20 @@
     <!-- Page Header End -->
 
 
+    @php
+        $contentSection = $sections['about_intro'] ?? null;
+        $contentHeading = Content::field($contentSection, 'heading', 'Building Smart Technology & EV Infrastructure for the Future');
+        $contentBody = Content::field($contentSection, 'body', '<p class="mb-4"><strong>Poised Technology</strong> is a future-focused technology company delivering innovative digital solutions, scalable software systems and intelligent EV charging infrastructure.</p><p class="mb-4">We help startups, enterprises and mobility businesses accelerate transformation through software engineering, cloud platforms, automation and smart energy ecosystems.</p><p class="mb-4">Our mission is to combine innovation, performance and reliability to create impactful technology solutions that drive real-world growth.</p>');
+        $badgeValue = Content::field($contentSection, 'badge_value', '25+');
+        $badgeLabel = Content::field($contentSection, 'badge_label', 'Years of Technology Excellence & Innovation Experience');
+
+        $checklistSection = $sections['checklist'] ?? null;
+        $checklistItems = Content::items($checklistSection, [
+            ['text' => 'Innovation Driven', 'description' => 'Modern scalable technology solutions', 'icon' => 'bi-check-circle-fill'],
+            ['text' => 'EV Ecosystem', 'description' => 'End-to-end EV infrastructure expertise', 'icon' => 'bi-check-circle-fill'],
+        ]);
+    @endphp
+
     <!-- Company Intro Start -->
     <div class="container-fluid py-5">
         <div class="container">
@@ -60,10 +74,9 @@
                         <div class="position-absolute bg-primary text-white p-4 rounded shadow"
                             style="bottom: -30px; right: -30px; max-width: 250px;">
 
-                            <h2 class="text-white mb-1">25+</h2>
+                            <h2 class="text-white mb-1">{{ $badgeValue }}</h2>
                             <p class="mb-0">
-                                Years of Technology Excellence &
-                                Innovation Experience
+                                {{ $badgeLabel }}
                             </p>
 
                         </div>
@@ -77,18 +90,6 @@
                     <h5 class="text-primary text-uppercase mb-3">
                         Who We Are
                     </h5>
-
-                    @php
-                        $contentSection = $sections['content'] ?? null;
-                        $contentHeading = Content::field($contentSection, 'heading', 'Building Smart Technology & EV Infrastructure for the Future');
-                        $contentBody = Content::field($contentSection, 'body', '<p class="mb-4"><strong>Poised Technology</strong> is a future-focused technology company delivering innovative digital solutions, scalable software systems and intelligent EV charging infrastructure.</p><p class="mb-4">We help startups, enterprises and mobility businesses accelerate transformation through software engineering, cloud platforms, automation and smart energy ecosystems.</p><p class="mb-4">Our mission is to combine innovation, performance and reliability to create impactful technology solutions that drive real-world growth.</p>');
-
-                        $checklistSection = $sections['checklist'] ?? null;
-                        $checklistItems = Content::items($checklistSection, [
-                            ['text' => 'Innovation Driven', 'description' => 'Modern scalable technology solutions', 'icon' => 'bi-check-circle-fill'],
-                            ['text' => 'EV Ecosystem', 'description' => 'End-to-end EV infrastructure expertise', 'icon' => 'bi-check-circle-fill'],
-                        ]);
-                    @endphp
 
                     <h1 class="display-5 mb-4">
                         {{ $contentHeading }}
@@ -105,7 +106,7 @@
 
                                     <div>
                                         <h5>{{ Content::itemField($item, 'text') }}</h5>
-                                        <span>{{ Content::itemField($item, 'description') }}</span>
+                                        <span>{!! Content::richtext(Content::itemField($item, 'description')) !!}</span>
                                     </div>
                                 </div>
                             </div>
@@ -162,9 +163,7 @@
 
                             <h3 class="mb-3">{{ Content::itemField($card, 'title') }}</h3>
 
-                            <p class="mb-0">
-                                {{ Content::itemField($card, 'description') }}
-                            </p>
+                            <div class="mb-0">{!! Content::richtext(Content::itemField($card, 'description')) !!}</div>
 
                         </div>
 
@@ -178,6 +177,17 @@
     <!-- Vision Mission End -->
 
 
+    @php
+        $evSection = $sections['ev_highlights'] ?? null;
+        $evHeading = Content::field($evSection, 'heading', 'Leading the EV Charging Revolution');
+        $evBody = Content::field($evSection, 'body', '<p class="mb-4">We specialize in designing and developing intelligent EV charging systems powered by smart software, automation and cloud connectivity.</p><p class="mb-4">From charger manufacturing to charger management systems, mobile apps and deployment infrastructure — we deliver complete EV ecosystem solutions.</p>');
+        $evImage = Content::mediaUrl(Content::field($evSection, 'image'), asset('assets/img/about-2.png'));
+        $evCards = Content::items($evSection, [
+            ['icon' => 'bi-ev-station', 'title' => 'Smart Chargers'],
+            ['icon' => 'bi-cpu',        'title' => 'Cloud Software'],
+        ]);
+    @endphp
+
     <!-- EV Section Start -->
     <div class="container-fluid py-5">
 
@@ -188,45 +198,26 @@
                 <div class="col-lg-6 wow fadeInLeft">
 
                     <h1 class="display-5 mb-4">
-                        Leading the EV Charging Revolution
+                        {{ $evHeading }}
                     </h1>
 
-                    <p class="mb-4">
-                        We specialize in designing and developing intelligent EV charging
-                        systems powered by smart software, automation and cloud connectivity.
-                    </p>
-
-                    <p class="mb-4">
-                        From charger manufacturing to charger management systems,
-                        mobile apps and deployment infrastructure —
-                        we deliver complete EV ecosystem solutions.
-                    </p>
+                    {!! Content::richtext($evBody) !!}
 
                     <div class="row g-4">
 
-                        <div class="col-sm-6">
+                        @foreach ($evCards as $card)
+                            <div class="col-sm-6">
 
-                            <div class="border rounded p-4 text-center">
+                                <div class="border rounded p-4 text-center">
 
-                                <i class="bi bi-ev-station display-5 text-primary mb-3"></i>
+                                    <i class="bi {{ Content::itemField($card, 'icon', 'bi-ev-station') }} display-5 text-primary mb-3"></i>
 
-                                <h5>Smart Chargers</h5>
+                                    <h5>{{ Content::itemField($card, 'title') }}</h5>
 
-                            </div>
-
-                        </div>
-
-                        <div class="col-sm-6">
-
-                            <div class="border rounded p-4 text-center">
-
-                                <i class="bi bi-cpu display-5 text-primary mb-3"></i>
-
-                                <h5>Cloud Software</h5>
+                                </div>
 
                             </div>
-
-                        </div>
+                        @endforeach
 
                     </div>
 
@@ -235,7 +226,7 @@
                 <div class="col-lg-6 wow fadeInRight">
 
                     <img class="img-fluid rounded shadow"
-                        src="{{ asset('assets/img/about-2.png') }}"
+                        src="{{ $evImage }}"
                         alt="EV Charging Infrastructure">
 
                 </div>
@@ -250,6 +241,8 @@
 
     @php
         $statsSection = $sections['stats'] ?? null;
+        $statsHeading = Content::field($statsSection, 'heading');
+        $statsSubheading = Content::field($statsSection, 'subheading');
         $stats = Content::items($statsSection, [
             ['label' => 'Projects Delivered', 'value' => '100'],
             ['label' => 'Enterprise Clients', 'value' => '50'],
@@ -262,6 +255,15 @@
     <div class="container-fluid bg-primary py-5">
 
         <div class="container">
+
+            @if ($statsHeading)
+                <div class="text-center text-white mx-auto mb-4" style="max-width: 600px;">
+                    <h2 class="text-white mb-2">{{ $statsHeading }}</h2>
+                    @if ($statsSubheading)
+                        <p class="text-white-50 mb-0">{{ $statsSubheading }}</p>
+                    @endif
+                </div>
+            @endif
 
             <div class="row text-center text-white g-4">
 
@@ -322,9 +324,7 @@
 
                             <h5>{{ Content::itemField($feature, 'title') }}</h5>
 
-                            <p class="mb-0">
-                                {{ Content::itemField($feature, 'description') }}
-                            </p>
+                            <div class="mb-0">{!! Content::richtext(Content::itemField($feature, 'description')) !!}</div>
 
                         </div>
 
@@ -356,9 +356,7 @@
                 {{ $ctaHeading }}
             </h1>
 
-            <p class="mb-4">
-                {{ $ctaBody }}
-            </p>
+            <div class="mb-4">{!! Content::richtext($ctaBody) !!}</div>
 
             <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-primary py-3 px-5">

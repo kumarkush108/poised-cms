@@ -31,6 +31,12 @@ class Media extends Model
 
     public function getUrlAttribute(): string
     {
+        // Root-relative for the public disk so it works on any host/port (dev or prod).
+        // For other disks (S3, etc.) fall back to the disk's own URL generator.
+        if ($this->disk === 'public') {
+            return '/storage/' . $this->path;
+        }
+
         return Storage::disk($this->disk)->url($this->path);
     }
 }

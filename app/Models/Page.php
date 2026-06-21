@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Route;
 
 class Page extends Model
 {
@@ -66,5 +67,34 @@ class Page extends Model
     public function sections()
     {
         return $this->hasMany(PageSection::class)->orderBy('order_column');
+    }
+
+    public function revisions()
+    {
+        return $this->hasMany(PageRevision::class)->latest();
+    }
+
+    /**
+     * The 5 system pages have a named route matching their slug (e.g.
+     * route('about')) with a URL path that doesn't always match the slug
+     * (services/solutions use singular paths). Pages created via the admin
+     * have no named route — they're served by the catch-all '/{slug}' route
+     * — so this falls back to a plain slug-based URL for those.
+     */
+    public function url(): string
+    {
+        return Route::has($this->slug)
+            ? route($this->slug)
+            : url('/' . $this->slug);
+    }
+
+    /**
+     * True for the 5 system pages, which have a named route matching their
+     * slug. Lets callers (e.g. nav "active" state) use the exact-same
+     * routeIs() check as before for those, and a path-based check otherwise.
+     */
+    public function hasNamedRoute(): bool
+    {
+        return Route::has($this->slug);
     }
 }

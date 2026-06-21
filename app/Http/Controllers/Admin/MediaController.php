@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Media;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MediaController extends Controller
@@ -15,6 +16,36 @@ class MediaController extends Controller
         return view('admin.media.index', compact('media'));
     }
 
+    public function modalItems(Request $request): JsonResponse
+    {
+        $query = Media::latest();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('filename', 'like', "%{$search}%")
+                  ->orWhere('alt_text', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        $media = $query->paginate(30);
+
+        $items = $media->getCollection()->map(fn (Media $m) => [
+            'id'       => $m->id,
+            'url'      => $m->url,
+            'filename' => $m->filename,
+            'alt'      => $m->alt_text ?? '',
+            'title'    => $m->title ?? '',
+            'mime'     => $m->mime_type,
+        ]);
+
+        return response()->json([
+            'items'    => $items,
+            'total'    => $media->total(),
+            'has_more' => $media->hasMorePages(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -24,13 +55,24 @@ class MediaController extends Controller
         $file = $request->file('file');
         $path = $file->store('media', 'public');
 
-        Media::create([
-            'disk' => 'public',
-            'path' => $path,
-            'filename' => $file->getClientOriginalName(),
+        $media = Media::create([
+            'disk'      => 'public',
+            'path'      => $path,
+            'filename'  => $file->getClientOriginalName(),
             'mime_type' => $file->getClientMimeType(),
-            'size' => $file->getSize(),
+            'size'      => $file->getSize(),
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'id'       => $media->id,
+                'url'      => $media->url,
+                'filename' => $media->filename,
+                'alt'      => $media->alt_text ?? '',
+                'title'    => $media->title ?? '',
+                'mime'     => $media->mime_type,
+            ], 201);
+        }
 
         return back()->with('success', 'File uploaded successfully.');
     }

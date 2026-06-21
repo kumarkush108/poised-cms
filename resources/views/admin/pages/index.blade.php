@@ -26,11 +26,21 @@
 
     </div>
 
+    <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Page
+    </a>
+
 </div>
 
 @if (session('success'))
     <div class="alert alert-success mt-3">
         {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger mt-3">
+        {{ session('error') }}
     </div>
 @endif
 
@@ -64,9 +74,22 @@
                         </td>
                         <td>{{ $page->sections->count() }}</td>
                         <td class="text-end">
+                            <a href="{{ route('admin.pages.history', $page) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-clock-history"></i> History
+                            </a>
                             <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
+                            @unless ($page->is_system)
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Page"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($page->title) }}&rdquo;? This cannot be undone."
+                                        data-confirm-action="{{ route('admin.pages.destroy', $page) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            @endunless
                         </td>
                     </tr>
                 @endforeach

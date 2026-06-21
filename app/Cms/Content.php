@@ -3,7 +3,6 @@
 namespace App\Cms;
 
 use App\Models\Media;
-use App\Models\Page;
 use App\Models\PageSection;
 use App\Models\SectionItem;
 use HTMLPurifier;
@@ -127,11 +126,14 @@ class Content
     }
 
     /**
-     * Read a Page metadata column (meta_title, og_description, etc.),
-     * falling back to $default when the page is missing or the column
-     * is empty.
+     * Read an SEO metadata column (meta_title, og_description, etc.) off any
+     * model that has one — Page, or any model using the HasSeoMeta trait
+     * (Product/BlogPost/NewsArticle) — falling back to $default when the
+     * record is missing or the column is empty. Intentionally not typed to
+     * Page specifically so partials/head.blade.php can be reused as-is by
+     * the new resource detail pages.
      */
-    public static function pageMeta(?Page $page, string $column, ?string $default = null): ?string
+    public static function pageMeta($page, string $column, ?string $default = null): ?string
     {
         if (! $page) {
             return $default;

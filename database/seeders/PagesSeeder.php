@@ -23,12 +23,15 @@ class PagesSeeder extends Seeder
             'brand_logos' => 3,
             'about' => 3,
             'features' => 4,
+            'tech_highlights' => 2,
+            'skill_bars' => 3,
             'services_grid' => 8,
             'testimonials' => 2,
         ],
         'about' => [
             'checklist' => 2,
             'cards' => 2,
+            'ev_highlights' => 2,
             'stats' => 4,
             'features' => 3,
         ],
@@ -76,6 +79,15 @@ class PagesSeeder extends Seeder
                     ['section_key' => $sectionKey],
                     ['order_column' => $index, 'is_active' => true]
                 );
+
+                // Re-sync display order on every run: allowed_sections can be
+                // reordered/extended after a page's sections already exist
+                // (e.g. inserting a new section type between two existing
+                // ones), which would otherwise leave a stale order_column
+                // that ties with - or follows - sections it should precede.
+                if ($section->order_column !== $index) {
+                    $section->update(['order_column' => $index]);
+                }
 
                 $itemType = TemplateRegistry::itemSchema($sectionKey)['item_type'] ?? null;
                 $itemCount = self::ITEM_COUNTS[$pageData['slug']][$sectionKey] ?? 0;

@@ -5,11 +5,19 @@
 
 @php
     $inputName = "{$namePrefix}[{$fieldKey}]";
-    $oldKey = "{$namePrefix}.{$fieldKey}";
-    $type = $def['type'] ?? 'string';
+    $oldKey    = "{$namePrefix}.{$fieldKey}";
+    $type      = $def['type'] ?? 'string';
+
+    $colClass = match($type) {
+        'richtext' => 'col-12',
+        'text'     => 'col-12',
+        'integer'  => 'col-md-4',
+        'media'    => 'col-md-6',
+        default    => 'col-md-6',
+    };
 @endphp
 
-<div class="col-md-6 mb-3">
+<div class="{{ $colClass }} mb-3">
     <label class="form-label">
         {{ $def['label'] ?? $fieldKey }}
         @if ($def['required'] ?? false)
@@ -18,9 +26,30 @@
     </label>
 
     @switch($type)
-        @case('text')
         @case('richtext')
-            <textarea name="{{ $inputName }}" class="form-control" rows="4">{{ old($oldKey, $currentValue['value'] ?? null) }}</textarea>
+            <div class="richtext-wrapper">
+                <div class="richtext-toolbar" data-toolbar-for="{{ $inputName }}"></div>
+                <div class="richtext-editor" data-richtext data-name="{{ $inputName }}">
+                    {!! old($oldKey, $currentValue['value'] ?? '') !!}
+                </div>
+                <textarea name="{{ $inputName }}" class="richtext-input visually-hidden" rows="8">{{ old($oldKey, $currentValue['value'] ?? null) }}</textarea>
+            </div>
+            @break
+
+        @case('text')
+            @if ($fieldKey === 'highlights')
+                {{-- Newline-delimited list — must stay as plain textarea so the frontend can split on \n --}}
+                <textarea name="{{ $inputName }}" class="form-control" rows="5"
+                          placeholder="One highlight per line">{{ old($oldKey, $currentValue['value'] ?? null) }}</textarea>
+            @else
+                <div class="richtext-wrapper">
+                    <div class="richtext-toolbar" data-toolbar-for="{{ $inputName }}"></div>
+                    <div class="richtext-editor" data-richtext data-name="{{ $inputName }}">
+                        {!! old($oldKey, $currentValue['value'] ?? '') !!}
+                    </div>
+                    <textarea name="{{ $inputName }}" class="richtext-input visually-hidden">{{ old($oldKey, $currentValue['value'] ?? null) }}</textarea>
+                </div>
+            @endif
             @break
 
         @case('integer')
@@ -33,11 +62,27 @@
                 value="{{ old($oldKey, $currentValue['value'] ?? null) }}">
             @break
 
+        @case('icon')
+            @php $iconValue = old($oldKey, $currentValue['value'] ?? ''); @endphp
+            <div class="input-group">
+                <span class="input-group-text icon-preview" data-icon-preview>
+                    @if ($iconValue)
+                        <i class="bi {{ $iconValue }}"></i>
+                    @else
+                        <i class="bi bi-question-circle text-muted"></i>
+                    @endif
+                </span>
+                <input type="text" name="{{ $inputName }}" class="form-control" data-icon-input
+                    value="{{ $iconValue }}"
+                    placeholder="e.g. bi-ev-station">
+            </div>
+            @break
+
         @case('media')
             @include('admin.partials.media-select', [
-                'name' => $inputName,
+                'name'     => $inputName,
                 'selected' => old($oldKey, $currentValue['media_id'] ?? null),
-                'images' => $images,
+                'images'   => $images,
             ])
             @break
 

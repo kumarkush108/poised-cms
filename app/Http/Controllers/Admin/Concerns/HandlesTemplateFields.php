@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Concerns;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 trait HandlesTemplateFields
 {
@@ -19,7 +20,16 @@ trait HandlesTemplateFields
 
             $rules["fields.$key"] = match ($def['type'] ?? 'string') {
                 'text', 'richtext' => [$presence, 'string'],
-                'url' => [$presence, 'url', 'max:255'],
+                // Page links are commonly site-relative ("/contact") or a
+                // mailto:/tel: scheme rather than a fully-qualified URL.
+                // Laravel's built-in "url" rule rejects both of those, which
+                // would block re-saving a section/item that already has one
+                // of these values without first changing it.
+                'url' => [$presence, Rule::when(
+                    fn ($input) => filled(data_get($input, "fields.$key")),
+                    [$this->urlOrPathRule(), 'max:255'],
+                    ['max:255'],
+                )],
                 'integer' => [$presence, 'integer'],
                 'media' => [$presence, 'exists:media,id'],
                 default => [$presence, 'string', 'max:255'],
@@ -27,6 +37,25 @@ trait HandlesTemplateFields
         }
 
         return $rules;
+    }
+
+    /**
+     * Accepts an absolute URL, a site-relative path ("/contact"), or a
+     * mailto:/tel: link.
+     */
+    protected function urlOrPathRule(): \Closure
+    {
+        return function (string $attribute, $value, \Closure $fail) {
+            if (filter_var($value, FILTER_VALIDATE_URL) !== false) {
+                return;
+            }
+
+            if (preg_match('#^(/[^\s]*|mailto:.+|tel:.+)$#', $value)) {
+                return;
+            }
+
+            $fail('The :attribute must be a valid URL, a site-relative path, or a mailto:/tel: link.');
+        };
     }
 
     /**

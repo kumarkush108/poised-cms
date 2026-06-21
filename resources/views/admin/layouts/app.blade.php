@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="@yield('meta_description', 'Admin Dashboard')">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'Admin Dashboard')</title>
 
@@ -42,9 +43,14 @@
 
 </div>
 
+<!-- Shared modals (available on every admin page) -->
+@include('admin.partials.media-picker-modal')
+@include('admin.partials.confirm-modal')
+
 <!-- JS -->
 <script src="{{ asset('admin/assets/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('admin/assets/js/main.js') }}"></script>
+@vite('resources/js/admin-editor.js')
 
 @stack('scripts')
 

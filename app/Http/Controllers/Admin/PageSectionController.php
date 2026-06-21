@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Cms\PageRevisionService;
 use App\Cms\TemplateRegistry;
 use App\Http\Controllers\Admin\Concerns\HandlesTemplateFields;
 use App\Http\Controllers\Controller;
@@ -23,6 +24,8 @@ class PageSectionController extends Controller
         $this->syncTemplateFields($section, $fieldDefs, $validated);
 
         $section->update(['is_active' => $request->boolean('is_active')]);
+
+        PageRevisionService::record($section->page, "Updated section \"{$section->section_key}\"");
 
         return back()->with('success', 'Section updated successfully.');
     }

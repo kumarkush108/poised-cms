@@ -11,7 +11,7 @@
     @php
         use App\Cms\Content;
 
-        $heroSection = $sections['hero'] ?? null;
+        $heroSection = $sections['page_header'] ?? null;
         $heroHeading = Content::field($heroSection, 'heading', 'Contact Us');
         $heroSubheading = Content::field($heroSection, 'subheading', 'Let’s discuss your next technology, software or EV infrastructure project.');
         $heroBg = Content::mediaUrl(Content::field($heroSection, 'background_image'), asset('assets/img/carousel-3.png'));
@@ -162,6 +162,8 @@
                         $contentBody = Content::field($contentSection, 'body', '<p class="mb-4">Whether you\'re looking for software development, EV charging infrastructure or digital transformation solutions, our team is ready to help.</p>');
 
                         $cardsSection = $sections['cards'] ?? null;
+                        $cardsHeading = Content::field($cardsSection, 'heading');
+                        $cardsSubheading = Content::field($cardsSection, 'subheading');
                         $infoCards = Content::items($cardsSection, [
                             ['icon' => 'bi-clock', 'title' => 'Working Hours', 'description' => 'Monday - Saturday : 09 AM - 06 PM'],
                             ['icon' => 'bi-headset', 'title' => 'Quick Support', 'description' => 'Dedicated support for all project inquiries.'],
@@ -173,6 +175,13 @@
                     </h1>
 
                     {!! Content::richtext($contentBody) !!}
+
+                    @if ($cardsHeading)
+                        <h6 class="text-uppercase mb-2">{{ $cardsHeading }}</h6>
+                        @if ($cardsSubheading)
+                            <p class="text-muted mb-3">{{ $cardsSubheading }}</p>
+                        @endif
+                    @endif
 
                     @foreach ($infoCards as $index => $card)
                         <div class="d-flex align-items-start {{ $loop->last ? '' : 'mb-4' }}">
@@ -187,9 +196,7 @@
                                     {{ Content::itemField($card, 'title') }}
                                 </h5>
 
-                                <span>
-                                    {{ Content::itemField($card, 'description') }}
-                                </span>
+                                <span>{!! Content::richtext(Content::itemField($card, 'description')) !!}</span>
 
                             </div>
 
@@ -441,7 +448,7 @@
 
                             <div class="accordion-body">
 
-                                {{ Content::itemField($faq, 'answer') }}
+                                {!! Content::richtext(Content::itemField($faq, 'answer')) !!}
 
                             </div>
 
@@ -473,9 +480,7 @@
                 {{ $ctaHeading }}
             </h1>
 
-            <p class="fs-5 mb-4 wow fadeInUp">
-                {{ $ctaBody }}
-            </p>
+            <div class="fs-5 mb-4 wow fadeInUp">{!! Content::richtext($ctaBody) !!}</div>
 
             <a href="{{ $ctaButtonUrl }}"
                 class="btn btn-light py-3 px-5 wow fadeInUp">

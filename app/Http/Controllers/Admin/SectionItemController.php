@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Cms\PageRevisionService;
 use App\Cms\TemplateRegistry;
 use App\Http\Controllers\Admin\Concerns\HandlesTemplateFields;
 use App\Http\Controllers\Controller;
@@ -35,6 +36,8 @@ class SectionItemController extends Controller
 
         $this->syncTemplateFields($item, $fieldDefs, $validated);
 
+        PageRevisionService::record($section->page, "Added item to \"{$section->section_key}\"");
+
         return back()->with('success', 'Item added successfully.');
     }
 
@@ -51,12 +54,18 @@ class SectionItemController extends Controller
 
         $item->update(['is_active' => $request->boolean('is_active')]);
 
+        PageRevisionService::record($item->section->page, "Updated item in \"{$item->section->section_key}\"");
+
         return back()->with('success', 'Item updated successfully.');
     }
 
     public function destroy(SectionItem $item)
     {
+        $section = $item->section;
+
         $item->delete();
+
+        PageRevisionService::record($section->page, "Removed item from \"{$section->section_key}\"");
 
         return back()->with('success', 'Item removed successfully.');
     }
