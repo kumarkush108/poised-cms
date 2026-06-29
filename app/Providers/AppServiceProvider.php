@@ -10,9 +10,12 @@ use App\Models\Setting;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Symfony\Component\Mime\Address;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,6 +58,22 @@ class AppServiceProvider extends ServiceProvider
             $this->app->forgetInstance('cms.menus');
         });
 
+        // Overrides only the "From" display name on every outgoing email
+        // (Mailables and notifications alike, since both go through
+        // Illuminate\Mail\Mailer::send() where this event fires) to the CMS
+        // "Site Name" setting, falling back to APP_NAME if unset/unavailable.
+        // The From *address* is left exactly as already resolved (global
+        // config or an explicit ->from() call) — only the name changes.
+        Event::listen(MessageSending::class, function (MessageSending $event) {
+            $fromAddress = $event->message->getFrom()[0] ?? null;
+
+            if (! $fromAddress) {
+                return;
+            }
+
+            $event->message->from(new Address($fromAddress->getAddress(), $this->resolveMailFromName()));
+        });
+
         // Public form submissions (Contact, Appointment, Product Inquiry):
         // two independent limits, both enforced. The per-IP limit catches
         // rapid-fire bot bursts; the per-email limit exists for a different
@@ -70,6 +89,17 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perHour(3)->by('form-email:'.strtolower((string) $request->input('email'))),
             ];
         });
+    }
+
+    private function resolveMailFromName(): string
+    {
+        try {
+            $siteName = Setting::where('group', 'general')->where('key', 'site_name')->value('value');
+        } catch (\Throwable $e) {
+            $siteName = null;
+        }
+
+        return filled($siteName) ? $siteName : config('app.name');
     }
 
     private function loadThemeSettings()
