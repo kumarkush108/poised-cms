@@ -21,12 +21,16 @@
     </div>
 
     <div class="d-flex gap-2">
-        <a href="{{ route('admin.product-categories.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-tags"></i> Categories
-        </a>
-        <a href="{{ route('admin.products.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Product
-        </a>
+        @if (hasPermission('product_categories', 'view'))
+            <a href="{{ route('admin.product-categories.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-tags"></i> Categories
+            </a>
+        @endif
+        @if (hasPermission('products', 'create'))
+            <a href="{{ route('admin.products.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Product
+            </a>
+        @endif
     </div>
 
 </div>
@@ -65,20 +69,24 @@
                         </td>
                         <td>{!! $product->is_featured ? '<i class="bi bi-star-fill text-warning"></i>' : '' !!}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.products.history', $product) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-clock-history"></i>
-                            </a>
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-confirm-delete"
-                                    data-confirm-title="Delete Product"
-                                    data-confirm-body="Delete &ldquo;{{ addslashes($product->title) }}&rdquo;? This cannot be undone."
-                                    data-confirm-action="{{ route('admin.products.destroy', $product) }}"
-                                    data-confirm-method="DELETE">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (hasPermission('products', 'edit'))
+                                <a href="{{ route('admin.products.history', $product) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (hasPermission('products', 'delete'))
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Product"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($product->title) }}&rdquo;? This cannot be undone."
+                                        data-confirm-action="{{ route('admin.products.destroy', $product) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

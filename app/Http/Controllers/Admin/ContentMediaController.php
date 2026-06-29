@@ -24,10 +24,21 @@ class ContentMediaController extends Controller
         'news_article' => NewsArticle::class,
     ];
 
+    /** type => owning resource's permission module — gallery/document attachments are part of editing that resource. */
+    private const TYPE_MODULES = [
+        'product' => 'products',
+        'blog_post' => 'blogs',
+        'news_article' => 'news',
+    ];
+
     public function store(Request $request, string $type, int $id)
     {
         $modelClass = self::ALLOWED_TYPES[$type] ?? null;
         abort_if(! $modelClass, 404);
+
+        if (! hasPermission(self::TYPE_MODULES[$type], 'edit')) {
+            abort(403);
+        }
 
         $model = $modelClass::findOrFail($id);
 
@@ -60,6 +71,10 @@ class ContentMediaController extends Controller
 
     public function update(Request $request, ContentMedia $contentMedia)
     {
+        if (! hasPermission(self::TYPE_MODULES[$contentMedia->mediable_type] ?? '', 'edit')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'caption' => ['nullable', 'string', 'max:255'],
         ]);
@@ -75,6 +90,10 @@ class ContentMediaController extends Controller
 
     public function destroy(ContentMedia $contentMedia)
     {
+        if (! hasPermission(self::TYPE_MODULES[$contentMedia->mediable_type] ?? '', 'edit')) {
+            abort(403);
+        }
+
         $model = $contentMedia->mediable;
         $role = $contentMedia->role;
 
@@ -89,6 +108,10 @@ class ContentMediaController extends Controller
 
     public function move(Request $request, ContentMedia $contentMedia)
     {
+        if (! hasPermission(self::TYPE_MODULES[$contentMedia->mediable_type] ?? '', 'edit')) {
+            abort(403);
+        }
+
         $request->validate(['direction' => ['required', 'in:up,down']]);
 
         $siblings = ContentMedia::where('mediable_type', $contentMedia->mediable_type)

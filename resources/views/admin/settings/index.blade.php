@@ -54,12 +54,14 @@
     @csrf
     @method('PATCH')
 
-    <div class="d-flex align-items-center mb-3">
-        <button class="btn btn-primary" type="submit">
-            <i class="bi bi-save"></i>
-            Save Settings
-        </button>
-    </div>
+    @if (hasPermission('settings', 'edit'))
+        <div class="d-flex align-items-center mb-3">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-save"></i>
+                Save Settings
+            </button>
+        </div>
+    @endif
 
     {{-- General & Branding --}}
     <div class="card mb-3">
@@ -429,10 +431,12 @@
 
     </div>
 
-    <button class="btn btn-primary" type="submit">
-        <i class="bi bi-save"></i>
-        Save Settings
-    </button>
+    @if (hasPermission('settings', 'edit'))
+        <button class="btn btn-primary" type="submit">
+            <i class="bi bi-save"></i>
+            Save Settings
+        </button>
+    @endif
 
 </form>
 

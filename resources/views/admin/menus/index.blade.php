@@ -56,10 +56,12 @@
                             </p>
                         </div>
 
-                        <a href="{{ route('admin.menus.edit', $menu) }}"
-                            class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-pencil"></i> Edit
-                        </a>
+                        @if (hasPermission('menus', 'edit'))
+                            <a href="{{ route('admin.menus.edit', $menu) }}"
+                                class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                        @endif
 
                     </div>
 

@@ -12,6 +12,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('dashboard', 'view')) {
+            abort(403);
+        }
+
         $pageCount      = Page::count();
         $mediaCount     = Media::count();
         $menuItemCount  = MenuItem::where('is_active', true)->count();

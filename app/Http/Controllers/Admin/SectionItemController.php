@@ -16,6 +16,10 @@ class SectionItemController extends Controller
 
     public function store(Request $request, PageSection $section)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $itemSchema = TemplateRegistry::itemSchema($section->section_key);
 
         abort_if(! $itemSchema, 404);
@@ -43,6 +47,10 @@ class SectionItemController extends Controller
 
     public function update(Request $request, SectionItem $item)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $itemSchema = TemplateRegistry::itemSchema($item->section->section_key);
         $fieldDefs = $itemSchema['fields'] ?? [];
 
@@ -61,6 +69,10 @@ class SectionItemController extends Controller
 
     public function destroy(SectionItem $item)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $section = $item->section;
 
         $item->delete();
@@ -72,6 +84,10 @@ class SectionItemController extends Controller
 
     public function move(Request $request, SectionItem $item)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $request->validate([
             'direction' => ['required', 'in:up,down'],
         ]);

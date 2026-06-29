@@ -11,6 +11,10 @@ class NewsCategoryController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('news_categories', 'view')) {
+            abort(403);
+        }
+
         return view('admin.news.categories.index', [
             'categories' => NewsCategory::withCount('articles')->orderBy('order_column')->orderBy('name')->get(),
         ]);
@@ -18,11 +22,19 @@ class NewsCategoryController extends Controller
 
     public function create()
     {
+        if (! hasPermission('news_categories', 'create')) {
+            abort(403);
+        }
+
         return view('admin.news.categories.create');
     }
 
     public function store(Request $request)
     {
+        if (! hasPermission('news_categories', 'create')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
@@ -40,11 +52,19 @@ class NewsCategoryController extends Controller
 
     public function edit(NewsCategory $newsCategory)
     {
+        if (! hasPermission('news_categories', 'edit')) {
+            abort(403);
+        }
+
         return view('admin.news.categories.edit', ['category' => $newsCategory]);
     }
 
     public function update(Request $request, NewsCategory $newsCategory)
     {
+        if (! hasPermission('news_categories', 'edit')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -57,6 +77,10 @@ class NewsCategoryController extends Controller
 
     public function destroy(NewsCategory $newsCategory)
     {
+        if (! hasPermission('news_categories', 'delete')) {
+            abort(403);
+        }
+
         $newsCategory->delete();
 
         return redirect()->route('admin.news-categories.index')->with('success', 'Category deleted successfully.');

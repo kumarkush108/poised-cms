@@ -16,9 +16,11 @@
         <a href="{{ route('admin.news-articles.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Articles
         </a>
-        <a href="{{ route('admin.news-categories.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Category
-        </a>
+        @if (hasPermission('news_categories', 'create'))
+            <a href="{{ route('admin.news-categories.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Category
+            </a>
+        @endif
     </div>
 </div>
 
@@ -44,17 +46,21 @@
                         <td><code>{{ $category->slug }}</code></td>
                         <td>{{ $category->articles_count }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.news-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-confirm-delete"
-                                    data-confirm-title="Delete Category"
-                                    data-confirm-body="Delete &ldquo;{{ addslashes($category->name) }}&rdquo;?"
-                                    data-confirm-action="{{ route('admin.news-categories.destroy', $category) }}"
-                                    data-confirm-method="DELETE">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (hasPermission('news_categories', 'edit'))
+                                <a href="{{ route('admin.news-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (hasPermission('news_categories', 'delete'))
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Category"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($category->name) }}&rdquo;?"
+                                        data-confirm-action="{{ route('admin.news-categories.destroy', $category) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

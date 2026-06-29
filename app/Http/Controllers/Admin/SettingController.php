@@ -63,6 +63,10 @@ class SettingController extends Controller
 
     public function index()
     {
+        if (! hasPermission('settings', 'view')) {
+            abort(403);
+        }
+
         $settings = Setting::all()->keyBy('key');
 
         $images = Media::where('mime_type', 'like', 'image/%')->orderBy('filename')->get();
@@ -72,6 +76,10 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
+        if (! hasPermission('settings', 'edit')) {
+            abort(403);
+        }
+
         $hexRule = ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'];
 
         $rules = [];

@@ -15,6 +15,10 @@ class NewsArticleController extends Controller
 {
     public function index(Request $request)
     {
+        if (! hasPermission('news', 'view')) {
+            abort(403);
+        }
+
         $articles = NewsArticle::with('category')
             ->when($request->filled('search'), fn ($q) => $q->where('title', 'like', '%' . $request->input('search') . '%'))
             ->orderByDesc('published_at')
@@ -30,6 +34,10 @@ class NewsArticleController extends Controller
 
     public function create()
     {
+        if (! hasPermission('news', 'create')) {
+            abort(403);
+        }
+
         return view('admin.news.create', [
             'categories' => NewsCategory::orderBy('name')->get(),
         ]);
@@ -37,6 +45,10 @@ class NewsArticleController extends Controller
 
     public function store(Request $request)
     {
+        if (! hasPermission('news', 'create')) {
+            abort(403);
+        }
+
         $validated = $this->validateArticle($request);
 
         $article = NewsArticle::create($validated);
@@ -49,6 +61,10 @@ class NewsArticleController extends Controller
 
     public function edit(NewsArticle $newsArticle)
     {
+        if (! hasPermission('news', 'edit')) {
+            abort(403);
+        }
+
         $newsArticle->load('category', 'gallery.media', 'documents.media');
 
         return view('admin.news.edit', [
@@ -60,7 +76,15 @@ class NewsArticleController extends Controller
 
     public function update(Request $request, NewsArticle $newsArticle)
     {
+        if (! hasPermission('news', 'edit')) {
+            abort(403);
+        }
+
         $validated = $this->validateArticle($request, $newsArticle);
+
+        if ($validated['status'] === 'published' && $newsArticle->status !== 'published' && ! hasPermission('news', 'publish')) {
+            abort(403);
+        }
 
         $newsArticle->update($validated);
 
@@ -71,6 +95,10 @@ class NewsArticleController extends Controller
 
     public function destroy(NewsArticle $newsArticle)
     {
+        if (! hasPermission('news', 'delete')) {
+            abort(403);
+        }
+
         $newsArticle->delete();
 
         return redirect()->route('admin.news-articles.index')->with('success', 'Article deleted successfully.');
@@ -78,6 +106,10 @@ class NewsArticleController extends Controller
 
     public function history(NewsArticle $newsArticle)
     {
+        if (! hasPermission('news', 'edit')) {
+            abort(403);
+        }
+
         return view('admin.news.history', [
             'article' => $newsArticle,
             'revisions' => $newsArticle->revisions()->with('createdBy')->paginate(20),
@@ -86,6 +118,10 @@ class NewsArticleController extends Controller
 
     public function restoreRevision(NewsArticle $newsArticle, ContentRevision $revision)
     {
+        if (! hasPermission('news', 'edit')) {
+            abort(403);
+        }
+
         abort_if($revision->revisionable_id !== $newsArticle->id, 404);
 
         ContentRevisionService::restore($revision);

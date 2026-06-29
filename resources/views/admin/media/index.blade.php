@@ -40,6 +40,7 @@
     </div>
 @enderror
 
+@if (hasPermission('media', 'upload'))
 <!-- Upload Form -->
 <section class="mt-4">
 
@@ -71,6 +72,7 @@
     </div>
 
 </section>
+@endif
 
 <!-- Media Grid -->
 <section class="row g-3 mt-1">
@@ -98,35 +100,39 @@
                         {{ $item->filename }}
                     </p>
 
-                    <form method="POST" action="{{ route('admin.media.update', $item) }}" class="mb-2">
+                    @if (hasPermission('media', 'edit'))
+                        <form method="POST" action="{{ route('admin.media.update', $item) }}" class="mb-2">
 
-                        @csrf
-                        @method('PATCH')
+                            @csrf
+                            @method('PATCH')
 
-                        <input type="text" name="title" class="form-control form-control-sm mb-1"
-                            placeholder="Title" value="{{ old('title', $item->title) }}">
+                            <input type="text" name="title" class="form-control form-control-sm mb-1"
+                                placeholder="Title" value="{{ old('title', $item->title) }}">
 
-                        <input type="text" name="alt_text" class="form-control form-control-sm mb-2"
-                            placeholder="Alt text" value="{{ old('alt_text', $item->alt_text) }}">
+                            <input type="text" name="alt_text" class="form-control form-control-sm mb-2"
+                                placeholder="Alt text" value="{{ old('alt_text', $item->alt_text) }}">
 
-                        <button class="btn btn-sm btn-outline-primary w-100" type="submit">
-                            Save
-                        </button>
+                            <button class="btn btn-sm btn-outline-primary w-100" type="submit">
+                                Save
+                            </button>
 
-                    </form>
+                        </form>
+                    @endif
 
-                    <form method="POST" action="{{ route('admin.media.destroy', $item) }}"
-                        onsubmit="return confirm('Move this file to trash?');">
+                    @if (hasPermission('media', 'delete'))
+                        <form method="POST" action="{{ route('admin.media.destroy', $item) }}"
+                            onsubmit="return confirm('Move this file to trash?');">
 
-                        @csrf
-                        @method('DELETE')
+                            @csrf
+                            @method('DELETE')
 
-                        <button class="btn btn-sm btn-outline-danger w-100" type="submit">
-                            <i class="bi bi-trash"></i>
-                            Delete
-                        </button>
+                            <button class="btn btn-sm btn-outline-danger w-100" type="submit">
+                                <i class="bi bi-trash"></i>
+                                Delete
+                            </button>
 
-                    </form>
+                        </form>
+                    @endif
 
                 </div>
 

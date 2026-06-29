@@ -15,12 +15,16 @@
     </div>
 
     <div class="d-flex gap-2">
-        <a href="{{ route('admin.news-categories.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-tags"></i> Categories
-        </a>
-        <a href="{{ route('admin.news-articles.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Article
-        </a>
+        @if (hasPermission('news_categories', 'view'))
+            <a href="{{ route('admin.news-categories.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-tags"></i> Categories
+            </a>
+        @endif
+        @if (hasPermission('news', 'create'))
+            <a href="{{ route('admin.news-articles.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Article
+            </a>
+        @endif
     </div>
 
 </div>
@@ -59,20 +63,24 @@
                         </td>
                         <td>{{ $article->published_at?->format('M j, Y') ?? '—' }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.news-articles.history', $article) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-clock-history"></i>
-                            </a>
-                            <a href="{{ route('admin.news-articles.edit', $article) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-confirm-delete"
-                                    data-confirm-title="Delete Article"
-                                    data-confirm-body="Delete &ldquo;{{ addslashes($article->title) }}&rdquo;? This cannot be undone."
-                                    data-confirm-action="{{ route('admin.news-articles.destroy', $article) }}"
-                                    data-confirm-method="DELETE">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (hasPermission('news', 'edit'))
+                                <a href="{{ route('admin.news-articles.history', $article) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                                <a href="{{ route('admin.news-articles.edit', $article) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (hasPermission('news', 'delete'))
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Article"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($article->title) }}&rdquo;? This cannot be undone."
+                                        data-confirm-action="{{ route('admin.news-articles.destroy', $article) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

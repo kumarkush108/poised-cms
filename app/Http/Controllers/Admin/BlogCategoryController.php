@@ -11,6 +11,10 @@ class BlogCategoryController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('blog_categories', 'view')) {
+            abort(403);
+        }
+
         return view('admin.blog.categories.index', [
             'categories' => BlogCategory::withCount('posts')->orderBy('order_column')->orderBy('name')->get(),
         ]);
@@ -18,11 +22,19 @@ class BlogCategoryController extends Controller
 
     public function create()
     {
+        if (! hasPermission('blog_categories', 'create')) {
+            abort(403);
+        }
+
         return view('admin.blog.categories.create');
     }
 
     public function store(Request $request)
     {
+        if (! hasPermission('blog_categories', 'create')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
@@ -40,11 +52,19 @@ class BlogCategoryController extends Controller
 
     public function edit(BlogCategory $blogCategory)
     {
+        if (! hasPermission('blog_categories', 'edit')) {
+            abort(403);
+        }
+
         return view('admin.blog.categories.edit', ['category' => $blogCategory]);
     }
 
     public function update(Request $request, BlogCategory $blogCategory)
     {
+        if (! hasPermission('blog_categories', 'edit')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -57,6 +77,10 @@ class BlogCategoryController extends Controller
 
     public function destroy(BlogCategory $blogCategory)
     {
+        if (! hasPermission('blog_categories', 'delete')) {
+            abort(403);
+        }
+
         $blogCategory->delete();
 
         return redirect()->route('admin.blog-categories.index')->with('success', 'Category deleted successfully.');

@@ -16,6 +16,10 @@ class PageController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('pages', 'view')) {
+            abort(403);
+        }
+
         $pages = Page::with('sections')->orderBy('title')->get();
 
         return view('admin.pages.index', compact('pages'));
@@ -23,6 +27,10 @@ class PageController extends Controller
 
     public function create()
     {
+        if (! hasPermission('pages', 'create')) {
+            abort(403);
+        }
+
         return view('admin.pages.create', [
             'templates' => TemplateRegistry::pageTemplates(forNewPage: true),
         ]);
@@ -30,6 +38,10 @@ class PageController extends Controller
 
     public function store(Request $request)
     {
+        if (! hasPermission('pages', 'create')) {
+            abort(403);
+        }
+
         $templateKeys = array_keys(TemplateRegistry::pageTemplates(forNewPage: true));
 
         $validated = $request->validate([
@@ -64,6 +76,10 @@ class PageController extends Controller
 
     public function destroy(Page $page)
     {
+        if (! hasPermission('pages', 'delete')) {
+            abort(403);
+        }
+
         try {
             $page->delete();
         } catch (\RuntimeException $e) {
@@ -75,6 +91,10 @@ class PageController extends Controller
 
     public function edit(Page $page)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $page->load('sections.fields', 'sections.items.fields');
 
         $images = Media::orderBy('filename')->get();
@@ -88,6 +108,10 @@ class PageController extends Controller
 
     public function update(Request $request, Page $page)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         if ($request->input('og_image_id') === '') {
             $request->merge(['og_image_id' => null]);
         }
@@ -106,6 +130,10 @@ class PageController extends Controller
             'published_at' => ['nullable', 'date'],
         ]);
 
+        if ($validated['status'] === 'published' && $page->status !== 'published' && ! hasPermission('pages', 'publish')) {
+            abort(403);
+        }
+
         $page->update($validated);
 
         PageRevisionService::record($page, 'Page details updated');
@@ -115,6 +143,10 @@ class PageController extends Controller
 
     public function history(Page $page)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $revisions = $page->revisions()->with('createdBy')->paginate(20);
 
         return view('admin.pages.history', [
@@ -125,6 +157,10 @@ class PageController extends Controller
 
     public function restoreRevision(Page $page, PageRevision $revision)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         abort_if($revision->page_id !== $page->id, 404);
 
         PageRevisionService::restore($revision);

@@ -9,6 +9,10 @@ class ContactMessageController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('contact_messages', 'view')) {
+            abort(403);
+        }
+
         $messages = ContactMessage::latest()->paginate(20);
         $unreadCount = ContactMessage::unread()->count();
 
@@ -17,6 +21,10 @@ class ContactMessageController extends Controller
 
     public function show(ContactMessage $contactMessage)
     {
+        if (! hasPermission('contact_messages', 'view')) {
+            abort(403);
+        }
+
         $contactMessage->markAsRead();
 
         return view('admin.contact-messages.show', compact('contactMessage'));
@@ -24,6 +32,10 @@ class ContactMessageController extends Controller
 
     public function archive(ContactMessage $contactMessage)
     {
+        if (! hasPermission('contact_messages', 'edit')) {
+            abort(403);
+        }
+
         $contactMessage->markAsRead();
 
         $contactMessage->update(['status' => 'archived']);

@@ -24,6 +24,10 @@ class MenuItemController extends Controller
 
     public function store(Request $request, Menu $menu)
     {
+        if (! hasPermission('menus', 'edit')) {
+            abort(403);
+        }
+
         $validated = $request->validateWithBag(self::NEW_ITEM_ERROR_BAG, [
             'label'     => ['required', 'string', 'max:100'],
             'icon'      => ['nullable', 'string', 'max:100'],
@@ -58,6 +62,10 @@ class MenuItemController extends Controller
 
     public function update(Request $request, MenuItem $menuItem)
     {
+        if (! hasPermission('menus', 'edit')) {
+            abort(403);
+        }
+
         $validated = $request->validateWithBag(self::errorBagFor($menuItem), [
             'label'     => ['required', 'string', 'max:100'],
             'icon'      => ['nullable', 'string', 'max:100'],
@@ -95,6 +103,10 @@ class MenuItemController extends Controller
 
     public function destroy(MenuItem $menuItem)
     {
+        if (! hasPermission('menus', 'edit')) {
+            abort(403);
+        }
+
         $menuItem->delete();
 
         return back()->with('success', 'Menu item removed.');
@@ -102,6 +114,10 @@ class MenuItemController extends Controller
 
     public function move(Request $request, MenuItem $menuItem)
     {
+        if (! hasPermission('menus', 'edit')) {
+            abort(403);
+        }
+
         $request->validate([
             'direction' => ['required', 'in:up,down'],
         ]);

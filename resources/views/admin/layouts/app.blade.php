@@ -50,6 +50,15 @@
 
 <!-- JS -->
 <script src="{{ asset('admin/assets/js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    // Feeds main.js's initUserProfile() (vendor theme JS) the real
+    // authenticated admin instead of its hardcoded demo placeholder —
+    // must be defined before main.js runs.
+    window.adminHMDUser = {
+        name: @json(auth()->user()->name),
+        avatar: @json(asset('admin/assets/images/avatar/avatar.jpg')),
+    };
+</script>
 <script src="{{ asset('admin/assets/js/main.js') }}"></script>
 @vite('resources/js/admin-editor.js')
 

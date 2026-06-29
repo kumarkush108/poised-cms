@@ -86,7 +86,7 @@
 
         <div class="row g-3">
 
-            @if ($homePage)
+            @if ($homePage && hasPermission('pages', 'edit'))
                 <div class="col-md-3">
                     <a href="{{ route('admin.pages.edit', $homePage) }}"
                        class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
@@ -96,29 +96,35 @@
                 </div>
             @endif
 
-            <div class="col-md-3">
-                <a href="{{ route('admin.media.index') }}"
-                   class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
-                    <i class="bi bi-upload fs-4 text-success"></i>
-                    <span class="small fw-semibold">Upload Media</span>
-                </a>
-            </div>
+            @if (hasPermission('media', 'upload'))
+                <div class="col-md-3">
+                    <a href="{{ route('admin.media.index') }}"
+                       class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
+                        <i class="bi bi-upload fs-4 text-success"></i>
+                        <span class="small fw-semibold">Upload Media</span>
+                    </a>
+                </div>
+            @endif
 
-            <div class="col-md-3">
-                <a href="{{ route('admin.contact-messages.index') }}"
-                   class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
-                    <i class="bi bi-inbox fs-4 text-warning"></i>
-                    <span class="small fw-semibold">View Messages</span>
-                </a>
-            </div>
+            @if (hasPermission('contact_messages', 'view'))
+                <div class="col-md-3">
+                    <a href="{{ route('admin.contact-messages.index') }}"
+                       class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
+                        <i class="bi bi-inbox fs-4 text-warning"></i>
+                        <span class="small fw-semibold">View Messages</span>
+                    </a>
+                </div>
+            @endif
 
-            <div class="col-md-3">
-                <a href="{{ route('admin.settings.index') }}"
-                   class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
-                    <i class="bi bi-palette fs-4 text-danger"></i>
-                    <span class="small fw-semibold">Theme Settings</span>
-                </a>
-            </div>
+            @if (hasPermission('settings', 'view'))
+                <div class="col-md-3">
+                    <a href="{{ route('admin.settings.index') }}"
+                       class="quick-action d-flex flex-column align-items-center gap-2 p-3 border rounded text-decoration-none text-reset">
+                        <i class="bi bi-palette fs-4 text-danger"></i>
+                        <span class="small fw-semibold">Theme Settings</span>
+                    </a>
+                </div>
+            @endif
 
         </div>
 

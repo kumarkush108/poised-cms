@@ -15,12 +15,16 @@
     </div>
 
     <div class="d-flex gap-2">
-        <a href="{{ route('admin.blog-categories.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-tags"></i> Categories
-        </a>
-        <a href="{{ route('admin.blog-posts.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Post
-        </a>
+        @if (hasPermission('blog_categories', 'view'))
+            <a href="{{ route('admin.blog-categories.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-tags"></i> Categories
+            </a>
+        @endif
+        @if (hasPermission('blogs', 'create'))
+            <a href="{{ route('admin.blog-posts.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Post
+            </a>
+        @endif
     </div>
 
 </div>
@@ -59,20 +63,24 @@
                         </td>
                         <td>{{ $post->published_at?->format('M j, Y') ?? '—' }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.blog-posts.history', $post) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-clock-history"></i>
-                            </a>
-                            <a href="{{ route('admin.blog-posts.edit', $post) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-confirm-delete"
-                                    data-confirm-title="Delete Post"
-                                    data-confirm-body="Delete &ldquo;{{ addslashes($post->title) }}&rdquo;? This cannot be undone."
-                                    data-confirm-action="{{ route('admin.blog-posts.destroy', $post) }}"
-                                    data-confirm-method="DELETE">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (hasPermission('blogs', 'edit'))
+                                <a href="{{ route('admin.blog-posts.history', $post) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                                <a href="{{ route('admin.blog-posts.edit', $post) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (hasPermission('blogs', 'delete'))
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Post"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($post->title) }}&rdquo;? This cannot be undone."
+                                        data-confirm-action="{{ route('admin.blog-posts.destroy', $post) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

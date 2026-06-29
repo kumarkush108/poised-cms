@@ -15,6 +15,10 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        if (! hasPermission('products', 'view')) {
+            abort(403);
+        }
+
         $products = Product::with('category')
             ->when($request->filled('search'), fn ($q) => $q->where('title', 'like', '%' . $request->input('search') . '%'))
             ->orderBy('title')
@@ -29,6 +33,10 @@ class ProductController extends Controller
 
     public function create()
     {
+        if (! hasPermission('products', 'create')) {
+            abort(403);
+        }
+
         return view('admin.products.create', [
             'categories' => ProductCategory::orderBy('name')->get(),
         ]);
@@ -36,6 +44,10 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        if (! hasPermission('products', 'create')) {
+            abort(403);
+        }
+
         $validated = $this->validateProduct($request);
 
         $product = Product::create($validated);
@@ -50,6 +62,10 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        if (! hasPermission('products', 'edit')) {
+            abort(403);
+        }
+
         $product->load('category', 'gallery.media', 'documents.media', 'relatedProducts');
 
         return view('admin.products.edit', [
@@ -62,7 +78,15 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        if (! hasPermission('products', 'edit')) {
+            abort(403);
+        }
+
         $validated = $this->validateProduct($request, $product);
+
+        if ($validated['status'] === 'published' && $product->status !== 'published' && ! hasPermission('products', 'publish')) {
+            abort(403);
+        }
 
         $product->update($validated);
 
@@ -75,6 +99,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        if (! hasPermission('products', 'delete')) {
+            abort(403);
+        }
+
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
@@ -82,6 +110,10 @@ class ProductController extends Controller
 
     public function history(Product $product)
     {
+        if (! hasPermission('products', 'edit')) {
+            abort(403);
+        }
+
         $revisions = $product->revisions()->with('createdBy')->paginate(20);
 
         return view('admin.products.history', [
@@ -92,6 +124,10 @@ class ProductController extends Controller
 
     public function restoreRevision(Product $product, ContentRevision $revision)
     {
+        if (! hasPermission('products', 'edit')) {
+            abort(403);
+        }
+
         abort_if($revision->revisionable_id !== $product->id, 404);
 
         ContentRevisionService::restore($revision);

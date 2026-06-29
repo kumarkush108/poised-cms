@@ -26,9 +26,11 @@
 
     </div>
 
-    <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Add Page
-    </a>
+    @if (hasPermission('pages', 'create'))
+        <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Page
+        </a>
+    @endif
 
 </div>
 
@@ -74,13 +76,15 @@
                         </td>
                         <td>{{ $page->sections->count() }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.pages.history', $page) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-clock-history"></i> History
-                            </a>
-                            <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            @unless ($page->is_system)
+                            @if (hasPermission('pages', 'edit'))
+                                <a href="{{ route('admin.pages.history', $page) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-clock-history"></i> History
+                                </a>
+                                <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (! $page->is_system && hasPermission('pages', 'delete'))
                                 <button type="button"
                                         class="btn btn-sm btn-outline-danger js-confirm-delete"
                                         data-confirm-title="Delete Page"
@@ -89,7 +93,7 @@
                                         data-confirm-method="DELETE">
                                     <i class="bi bi-trash"></i> Delete
                                 </button>
-                            @endunless
+                            @endif
                         </td>
                     </tr>
                 @endforeach

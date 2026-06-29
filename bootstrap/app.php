@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckAdminPermission;
 use App\Http\Middleware\PreventSpamSubmissions;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'spam-protection' => PreventSpamSubmissions::class,
+            'permission' => CheckAdminPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

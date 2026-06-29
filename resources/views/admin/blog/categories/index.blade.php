@@ -16,9 +16,11 @@
         <a href="{{ route('admin.blog-posts.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Posts
         </a>
-        <a href="{{ route('admin.blog-categories.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Category
-        </a>
+        @if (hasPermission('blog_categories', 'create'))
+            <a href="{{ route('admin.blog-categories.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Category
+            </a>
+        @endif
     </div>
 </div>
 
@@ -44,17 +46,21 @@
                         <td><code>{{ $category->slug }}</code></td>
                         <td>{{ $category->posts_count }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.blog-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-confirm-delete"
-                                    data-confirm-title="Delete Category"
-                                    data-confirm-body="Delete &ldquo;{{ addslashes($category->name) }}&rdquo;?"
-                                    data-confirm-action="{{ route('admin.blog-categories.destroy', $category) }}"
-                                    data-confirm-method="DELETE">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (hasPermission('blog_categories', 'edit'))
+                                <a href="{{ route('admin.blog-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (hasPermission('blog_categories', 'delete'))
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Category"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($category->name) }}&rdquo;?"
+                                        data-confirm-action="{{ route('admin.blog-categories.destroy', $category) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

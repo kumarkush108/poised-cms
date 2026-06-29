@@ -13,6 +13,10 @@ class MenuController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('menus', 'view')) {
+            abort(403);
+        }
+
         $menus = Menu::withCount('items')->get();
 
         return view('admin.menus.index', compact('menus'));
@@ -20,6 +24,10 @@ class MenuController extends Controller
 
     public function edit(Menu $menu)
     {
+        if (! hasPermission('menus', 'edit')) {
+            abort(403);
+        }
+
         // Admin editing shows children regardless of is_active (so a
         // hidden child can still be found and re-enabled), unlike public
         // rendering which only ever loads active ones.

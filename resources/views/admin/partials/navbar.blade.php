@@ -19,10 +19,11 @@
                         data-bs-toggle="dropdown">
 
                     <img class="avatar-img avatar-sm"
-                         src="{{ asset('admin/assets/images/avatar/avatar.jpg') }}">
+                         src="{{ asset('admin/assets/images/avatar/avatar.jpg') }}"
+                         alt="{{ auth()->user()->name }}">
 
                     <span class="profile-name d-none d-sm-inline">
-                        Admin
+                        {{ auth()->user()->name }}
                     </span>
 
                 </button>
@@ -30,16 +31,18 @@
                 <ul class="dropdown-menu dropdown-menu-end">
 
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ route('admin.profile.edit') }}">
                             Profile
                         </a>
                     </li>
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            Settings
-                        </a>
-                    </li>
+                    @if (hasPermission('settings', 'view'))
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.settings.index') }}">
+                                Settings
+                            </a>
+                        </li>
+                    @endif
 
                     <li><hr class="dropdown-divider"></li>
 

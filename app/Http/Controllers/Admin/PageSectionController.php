@@ -15,6 +15,10 @@ class PageSectionController extends Controller
 
     public function update(Request $request, PageSection $section)
     {
+        if (! hasPermission('pages', 'edit')) {
+            abort(403);
+        }
+
         $fieldDefs = TemplateRegistry::sectionFields($section->section_key);
 
         $this->normalizeMediaFields($request, $fieldDefs);

@@ -11,6 +11,10 @@ class MediaController extends Controller
 {
     public function index()
     {
+        if (! hasPermission('media', 'view')) {
+            abort(403);
+        }
+
         $media = Media::latest()->paginate(24);
 
         return view('admin.media.index', compact('media'));
@@ -18,6 +22,10 @@ class MediaController extends Controller
 
     public function modalItems(Request $request): JsonResponse
     {
+        if (! hasPermission('media', 'view')) {
+            abort(403);
+        }
+
         $query = Media::latest();
 
         if ($search = $request->input('search')) {
@@ -48,6 +56,10 @@ class MediaController extends Controller
 
     public function store(Request $request)
     {
+        if (! hasPermission('media', 'upload')) {
+            abort(403);
+        }
+
         $request->validate([
             'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg,webp,pdf|max:5120',
         ]);
@@ -79,6 +91,10 @@ class MediaController extends Controller
 
     public function update(Request $request, Media $media)
     {
+        if (! hasPermission('media', 'edit')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'alt_text' => 'nullable|string|max:255',
             'title' => 'nullable|string|max:255',
@@ -91,6 +107,10 @@ class MediaController extends Controller
 
     public function destroy(Media $media)
     {
+        if (! hasPermission('media', 'delete')) {
+            abort(403);
+        }
+
         $media->delete();
 
         return back()->with('success', 'Media moved to trash.');

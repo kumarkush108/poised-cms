@@ -18,9 +18,11 @@
         <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Products
         </a>
-        <a href="{{ route('admin.product-categories.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Category
-        </a>
+        @if (hasPermission('product_categories', 'create'))
+            <a href="{{ route('admin.product-categories.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add Category
+            </a>
+        @endif
     </div>
 
 </div>
@@ -51,17 +53,21 @@
                         <td><code>{{ $category->slug }}</code></td>
                         <td>{{ $category->products_count }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.product-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-confirm-delete"
-                                    data-confirm-title="Delete Category"
-                                    data-confirm-body="Delete &ldquo;{{ addslashes($category->name) }}&rdquo;? Products in this category will keep their other data but lose this category."
-                                    data-confirm-action="{{ route('admin.product-categories.destroy', $category) }}"
-                                    data-confirm-method="DELETE">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            @if (hasPermission('product_categories', 'edit'))
+                                <a href="{{ route('admin.product-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            @if (hasPermission('product_categories', 'delete'))
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-confirm-delete"
+                                        data-confirm-title="Delete Category"
+                                        data-confirm-body="Delete &ldquo;{{ addslashes($category->name) }}&rdquo;? Products in this category will keep their other data but lose this category."
+                                        data-confirm-action="{{ route('admin.product-categories.destroy', $category) }}"
+                                        data-confirm-method="DELETE">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

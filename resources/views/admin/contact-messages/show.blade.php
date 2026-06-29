@@ -83,7 +83,7 @@
 
 </div>
 
-@if ($contactMessage->status !== 'archived')
+@if ($contactMessage->status !== 'archived' && hasPermission('contact_messages', 'edit'))
     <form method="POST" action="{{ route('admin.contact-messages.archive', $contactMessage) }}" class="mt-3">
         @csrf
         @method('PATCH')

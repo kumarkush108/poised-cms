@@ -17,6 +17,10 @@ class BlogPostController extends Controller
 {
     public function index(Request $request)
     {
+        if (! hasPermission('blogs', 'view')) {
+            abort(403);
+        }
+
         $posts = BlogPost::with('category')
             ->when($request->filled('search'), fn ($q) => $q->where('title', 'like', '%' . $request->input('search') . '%'))
             ->orderByDesc('published_at')
@@ -32,6 +36,10 @@ class BlogPostController extends Controller
 
     public function create()
     {
+        if (! hasPermission('blogs', 'create')) {
+            abort(403);
+        }
+
         return view('admin.blog.create', [
             'categories' => BlogCategory::orderBy('name')->get(),
         ]);
@@ -39,6 +47,10 @@ class BlogPostController extends Controller
 
     public function store(Request $request)
     {
+        if (! hasPermission('blogs', 'create')) {
+            abort(403);
+        }
+
         $validated = $this->validatePost($request);
         $tags = $validated['tags'] ?? null;
         unset($validated['tags']);
@@ -55,6 +67,10 @@ class BlogPostController extends Controller
 
     public function edit(BlogPost $blogPost)
     {
+        if (! hasPermission('blogs', 'edit')) {
+            abort(403);
+        }
+
         $blogPost->load('category', 'tags');
 
         return view('admin.blog.edit', [
@@ -66,9 +82,17 @@ class BlogPostController extends Controller
 
     public function update(Request $request, BlogPost $blogPost)
     {
+        if (! hasPermission('blogs', 'edit')) {
+            abort(403);
+        }
+
         $validated = $this->validatePost($request, $blogPost);
         $tags = $validated['tags'] ?? null;
         unset($validated['tags']);
+
+        if ($validated['status'] === 'published' && $blogPost->status !== 'published' && ! hasPermission('blogs', 'publish')) {
+            abort(403);
+        }
 
         $blogPost->update($validated);
 
@@ -81,6 +105,10 @@ class BlogPostController extends Controller
 
     public function destroy(BlogPost $blogPost)
     {
+        if (! hasPermission('blogs', 'delete')) {
+            abort(403);
+        }
+
         $blogPost->delete();
 
         return redirect()->route('admin.blog-posts.index')->with('success', 'Post deleted successfully.');
@@ -88,6 +116,10 @@ class BlogPostController extends Controller
 
     public function history(BlogPost $blogPost)
     {
+        if (! hasPermission('blogs', 'edit')) {
+            abort(403);
+        }
+
         return view('admin.blog.history', [
             'post' => $blogPost,
             'revisions' => $blogPost->revisions()->with('createdBy')->paginate(20),
@@ -96,6 +128,10 @@ class BlogPostController extends Controller
 
     public function restoreRevision(BlogPost $blogPost, ContentRevision $revision)
     {
+        if (! hasPermission('blogs', 'edit')) {
+            abort(403);
+        }
+
         abort_if($revision->revisionable_id !== $blogPost->id, 404);
 
         ContentRevisionService::restore($revision);

@@ -15,95 +15,125 @@
 
     <nav class="sidebar-nav">
 
-        <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-            href="{{ route('admin.dashboard') }}">
+        @if (hasPermission('dashboard', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                href="{{ route('admin.dashboard') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-speedometer2"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-speedometer2"></i>
+                </span>
 
-            <span class="nav-text">Dashboard</span>
-        </a>
+                <span class="nav-text">Dashboard</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}"
-            href="{{ route('admin.media.index') }}">
+        @if (hasPermission('media', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}"
+                href="{{ route('admin.media.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-images"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-images"></i>
+                </span>
 
-            <span class="nav-text">Media Library</span>
-        </a>
+                <span class="nav-text">Media Library</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
-            href="{{ route('admin.settings.index') }}">
+        @if (hasPermission('settings', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}"
+                href="{{ route('admin.settings.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-palette"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-palette"></i>
+                </span>
 
-            <span class="nav-text">Theme Settings</span>
-        </a>
+                <span class="nav-text">Theme Settings</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}"
-            href="{{ route('admin.pages.index') }}">
+        @if (hasPermission('pages', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}"
+                href="{{ route('admin.pages.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-file-earmark-text"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </span>
 
-            <span class="nav-text">Pages</span>
-        </a>
+                <span class="nav-text">Pages</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.product-categories.*') ? 'active' : '' }}"
-            href="{{ route('admin.products.index') }}">
+        @if (hasPermission('products', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.product-categories.*') ? 'active' : '' }}"
+                href="{{ route('admin.products.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-box-seam"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-box-seam"></i>
+                </span>
 
-            <span class="nav-text">Products</span>
-        </a>
+                <span class="nav-text">Products</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.blog-posts.*') || request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}"
-            href="{{ route('admin.blog-posts.index') }}">
+        @if (hasPermission('blogs', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.blog-posts.*') || request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}"
+                href="{{ route('admin.blog-posts.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-journal-text"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-journal-text"></i>
+                </span>
 
-            <span class="nav-text">Blog</span>
-        </a>
+                <span class="nav-text">Blog</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.news-articles.*') || request()->routeIs('admin.news-categories.*') ? 'active' : '' }}"
-            href="{{ route('admin.news-articles.index') }}">
+        @if (hasPermission('news', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.news-articles.*') || request()->routeIs('admin.news-categories.*') ? 'active' : '' }}"
+                href="{{ route('admin.news-articles.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-newspaper"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-newspaper"></i>
+                </span>
 
-            <span class="nav-text">News</span>
-        </a>
+                <span class="nav-text">News</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.menus.*') || request()->routeIs('admin.menu-items.*') ? 'active' : '' }}"
-            href="{{ route('admin.menus.index') }}">
+        @if (hasPermission('menus', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.menus.*') || request()->routeIs('admin.menu-items.*') ? 'active' : '' }}"
+                href="{{ route('admin.menus.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-list-nested"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-list-nested"></i>
+                </span>
 
-            <span class="nav-text">Menus</span>
-        </a>
+                <span class="nav-text">Menus</span>
+            </a>
+        @endif
 
-        <a class="nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}"
-            href="{{ route('admin.contact-messages.index') }}">
+        @if (hasPermission('contact_messages', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}"
+                href="{{ route('admin.contact-messages.index') }}">
 
-            <span class="nav-icon">
-                <i class="bi bi-envelope"></i>
-            </span>
+                <span class="nav-icon">
+                    <i class="bi bi-envelope"></i>
+                </span>
 
-            <span class="nav-text">Contact Messages</span>
-        </a>
+                <span class="nav-text">Contact Messages</span>
+            </a>
+        @endif
+
+        @if (hasPermission('admins', 'view'))
+            <a class="nav-link {{ request()->routeIs('admin.admins.*') ? 'active' : '' }}"
+                href="{{ route('admin.admins.index') }}">
+
+                <span class="nav-icon">
+                    <i class="bi bi-people"></i>
+                </span>
+
+                <span class="nav-text">Admins</span>
+            </a>
+        @endif
 
     </nav>
 
