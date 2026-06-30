@@ -230,10 +230,12 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('contact.submit') }}">
+                        <form method="POST" action="{{ route('contact.submit') }}" class="js-ajax-form">
 
                             @csrf
                             @include('partials.spam-protection-fields')
+
+                            <div class="js-form-feedback"></div>
 
                             <div class="row g-4">
 
@@ -247,7 +249,10 @@
                                             id="name"
                                             name="name"
                                             value="{{ old('name') }}"
-                                            placeholder="Your Name">
+                                            placeholder="Your Name"
+                                            required
+                                            minlength="2"
+                                            maxlength="255">
 
                                         <label for="name">
                                             Your Name
@@ -267,7 +272,9 @@
                                             id="email"
                                             name="email"
                                             value="{{ old('email') }}"
-                                            placeholder="Your Email">
+                                            placeholder="Your Email"
+                                            required
+                                            maxlength="255">
 
                                         <label for="email">
                                             Your Email
@@ -282,12 +289,15 @@
 
                                     <div class="form-floating">
 
-                                        <input type="text"
+                                        <input type="tel"
                                             class="form-control"
                                             id="phone"
                                             name="phone"
                                             value="{{ old('phone') }}"
-                                            placeholder="Phone Number">
+                                            placeholder="Phone Number"
+                                            pattern="[0-9+\-\s()]{7,50}"
+                                            title="Use only numbers, spaces, and + - ( )"
+                                            maxlength="50">
 
                                         <label for="phone">
                                             Phone Number
@@ -343,7 +353,10 @@
                                             placeholder="Leave a message here"
                                             id="message"
                                             name="message"
-                                            style="height: 150px">{{ old('message') }}</textarea>
+                                            style="height: 150px"
+                                            required
+                                            minlength="10"
+                                            maxlength="5000">{{ old('message') }}</textarea>
 
                                         <label for="message">
                                             Your Message
@@ -352,6 +365,12 @@
                                     </div>
 
                                 </div>
+
+                                @if (config('services.recaptcha.site_key'))
+                                    <div class="col-12">
+                                        <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                                    </div>
+                                @endif
 
                                 <!-- Button -->
                                 <div class="col-12">

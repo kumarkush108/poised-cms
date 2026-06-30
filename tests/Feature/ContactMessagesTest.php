@@ -126,7 +126,7 @@ class ContactMessagesTest extends TestCase
         $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -142,7 +142,7 @@ class ContactMessagesTest extends TestCase
             'email' => 'jane@example.com',
             'phone' => '',
             'subject' => '',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -157,7 +157,7 @@ class ContactMessagesTest extends TestCase
         $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -172,7 +172,7 @@ class ContactMessagesTest extends TestCase
         $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             'source_page' => 'admin',
             'status' => 'archived',
             'ip_address' => '1.2.3.4',
@@ -199,15 +199,20 @@ class ContactMessagesTest extends TestCase
         $payload = [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
             ...$this->validSpamToken(),
         ];
 
+        // Distinct message text per attempt — these 3 requests are meant to
+        // simulate 3 separate genuine submissions hitting the per-email rate
+        // limit, not 3 copies of one submission (which the dedup guard in
+        // ContactMessageController::store() would now correctly collapse).
         for ($i = 0; $i < 3; $i++) {
-            $this->post(route('contact.submit'), $payload)->assertSessionHas('success');
+            $this->post(route('contact.submit'), [...$payload, 'message' => "Hello, this is message number {$i}."])
+                ->assertSessionHas('success');
         }
 
-        $this->post(route('contact.submit'), $payload)->assertStatus(429);
+        $this->post(route('contact.submit'), [...$payload, 'message' => 'Hello, this is the 4th message.'])
+            ->assertStatus(429);
 
         $this->assertSame(3, ContactMessage::count());
     }
@@ -217,29 +222,30 @@ class ContactMessagesTest extends TestCase
         $payload = [
             'name' => 'John Smith',
             'email' => 'john@example.com',
-            'message' => 'Hello.',
             ...$this->validSpamToken(),
         ];
 
         for ($i = 0; $i < 3; $i++) {
-            $this->post(route('appointment.submit'), $payload)->assertSessionHas('success');
+            $this->post(route('appointment.submit'), [...$payload, 'message' => "Hello, this is message number {$i}."])
+                ->assertSessionHas('success');
         }
 
-        $this->post(route('appointment.submit'), $payload)->assertStatus(429);
+        $this->post(route('appointment.submit'), [...$payload, 'message' => 'Hello, this is the 4th message.'])
+            ->assertStatus(429);
 
         $this->assertSame(3, ContactMessage::count());
     }
 
     public function test_rate_limit_is_per_email_not_shared_across_different_senders(): void
     {
-        $base = ['message' => 'Hello.', ...$this->validSpamToken()];
+        $base = ['message' => 'Hello, I would like to know more about your services.', ...$this->validSpamToken()];
 
         // 3 different emails, same IP — each gets its own email-bucket, so
         // none of these should be blocked by the per-email limit. (They
         // also stay under the 5/minute per-IP limit at only 3 requests.)
-        $this->post(route('contact.submit'), [...$base, 'name' => 'A', 'email' => 'a@example.com'])->assertSessionHas('success');
-        $this->post(route('contact.submit'), [...$base, 'name' => 'B', 'email' => 'b@example.com'])->assertSessionHas('success');
-        $this->post(route('contact.submit'), [...$base, 'name' => 'C', 'email' => 'c@example.com'])->assertSessionHas('success');
+        $this->post(route('contact.submit'), [...$base, 'name' => 'Ann', 'email' => 'a@example.com'])->assertSessionHas('success');
+        $this->post(route('contact.submit'), [...$base, 'name' => 'Bob', 'email' => 'b@example.com'])->assertSessionHas('success');
+        $this->post(route('contact.submit'), [...$base, 'name' => 'Cam', 'email' => 'c@example.com'])->assertSessionHas('success');
 
         $this->assertSame(3, ContactMessage::count());
     }

@@ -200,23 +200,29 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('products.inquiry') }}">
+                    <form method="POST" action="{{ route('products.inquiry') }}" class="js-ajax-form">
                         @csrf
                         @include('partials.spam-protection-fields')
+                        <div class="js-form-feedback"></div>
                         <input type="hidden" name="subject" value="Product Inquiry: {{ $product->title }}">
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <input type="text" name="name" class="form-control" placeholder="Your Name" value="{{ old('name') }}">
+                                <input type="text" name="name" class="form-control" placeholder="Your Name" value="{{ old('name') }}" required minlength="2" maxlength="255">
                             </div>
                             <div class="col-sm-6">
-                                <input type="email" name="email" class="form-control" placeholder="Your Email" value="{{ old('email') }}">
+                                <input type="email" name="email" class="form-control" placeholder="Your Email" value="{{ old('email') }}" required maxlength="255">
                             </div>
                             <div class="col-sm-6">
-                                <input type="text" name="phone" class="form-control" placeholder="Your Phone" value="{{ old('phone') }}">
+                                <input type="tel" name="phone" class="form-control" placeholder="Your Phone" value="{{ old('phone') }}" pattern="[0-9+\-\s()]{7,50}" title="Use only numbers, spaces, and + - ( )" maxlength="50">
                             </div>
                             <div class="col-12">
-                                <textarea name="message" class="form-control" rows="4" placeholder="Tell us what you need…">{{ old('message') }}</textarea>
+                                <textarea name="message" class="form-control" rows="4" placeholder="Tell us what you need…" required minlength="10" maxlength="5000">{{ old('message') }}</textarea>
                             </div>
+                            @if (config('services.recaptcha.site_key'))
+                                <div class="col-12">
+                                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                                </div>
+                            @endif
                             <div class="col-12 text-center">
                                 <button class="btn btn-primary px-5 py-3" type="submit">Send Inquiry</button>
                             </div>

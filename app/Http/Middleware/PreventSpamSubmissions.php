@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\ContactMessageController;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -39,7 +40,15 @@ class PreventSpamSubmissions
                 'ip' => $request->ip(),
             ]);
 
-            return back()->with('success', 'Thank you for reaching out. We will get back to you soon.');
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => ContactMessageController::SUCCESS_MESSAGE,
+                    'next_token' => encrypt(time()),
+                ]);
+            }
+
+            return back()->with('success', ContactMessageController::SUCCESS_MESSAGE);
         }
 
         return $next($request);

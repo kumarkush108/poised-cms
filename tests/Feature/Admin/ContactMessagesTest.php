@@ -11,6 +11,21 @@ class ContactMessagesTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * source_page/ip_address/status are deliberately not mass-assignable on
+     * ContactMessage (see app/Models/ContactMessage.php) — this helper sets
+     * them via forceFill() for test fixtures, mirroring how
+     * ContactMessageController::store() does it for real requests.
+     */
+    private function createContactMessage(array $attributes): ContactMessage
+    {
+        $message = new ContactMessage($attributes);
+        $message->forceFill($attributes);
+        $message->save();
+
+        return $message;
+    }
+
     public function test_guest_is_redirected_from_contact_messages_index(): void
     {
         $response = $this->get(route('admin.contact-messages.index'));
@@ -20,7 +35,7 @@ class ContactMessagesTest extends TestCase
 
     public function test_guest_is_redirected_from_contact_message_show_and_archive(): void
     {
-        $message = ContactMessage::create([
+        $message = $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'Hello there.',
@@ -39,7 +54,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        ContactMessage::create([
+        $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'Hello there.',
@@ -59,7 +74,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $message = ContactMessage::create([
+        $message = $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'Hello there.',
@@ -82,7 +97,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $message = ContactMessage::create([
+        $message = $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'Hello there.',
@@ -103,7 +118,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $message = ContactMessage::create([
+        $message = $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'Hello there.',
@@ -124,7 +139,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $message = ContactMessage::create([
+        $message = $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'Hello there.',
@@ -147,7 +162,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $message = ContactMessage::create([
+        $message = $this->createContactMessage([
             'name' => '<script>alert("name")</script>',
             'email' => 'jane@example.com',
             'message' => '<script>alert("xss")</script>',
@@ -170,7 +185,7 @@ class ContactMessagesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        ContactMessage::create([
+        $this->createContactMessage([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'message' => 'First message.',
@@ -178,7 +193,7 @@ class ContactMessagesTest extends TestCase
             'status' => 'new',
         ]);
 
-        ContactMessage::create([
+        $this->createContactMessage([
             'name' => 'John Smith',
             'email' => 'john@example.com',
             'message' => 'Second message.',

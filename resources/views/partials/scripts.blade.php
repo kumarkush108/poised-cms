@@ -21,6 +21,13 @@
 <!-- Main Custom JS -->
 <script src="{{ asset('assets/js/main.js') }}"></script>
 
+<!-- Form submission (disable/loading/inline result for Contact, Appointment, Product Inquiry) -->
+<script src="{{ asset('assets/js/form-submit.js') }}"></script>
+
+@if (config('services.recaptcha.site_key'))
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endif
+
 
 <!-- Brand Logo Slider -->
 <script>

@@ -125,7 +125,7 @@ class FormNotificationMailTest extends TestCase
         $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -139,7 +139,7 @@ class FormNotificationMailTest extends TestCase
         $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -154,7 +154,7 @@ class FormNotificationMailTest extends TestCase
         $response = $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -202,7 +202,7 @@ class FormNotificationMailTest extends TestCase
         $response = $this->post(route('contact.submit'), [
             'name' => 'Bot',
             'email' => 'bot@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             'form_rendered_at' => encrypt(time()), // 0 seconds old — too fast for a human
         ]);
 
@@ -216,7 +216,7 @@ class FormNotificationMailTest extends TestCase
         $response = $this->post(route('contact.submit'), [
             'name' => 'Bot',
             'email' => 'bot@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             'form_rendered_at' => encrypt(time() - 7200), // 2 hours old
         ]);
 
@@ -230,7 +230,7 @@ class FormNotificationMailTest extends TestCase
         $response = $this->post(route('contact.submit'), [
             'name' => 'Bot',
             'email' => 'bot@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             'form_rendered_at' => 'not-a-real-encrypted-value',
         ]);
 
@@ -244,7 +244,7 @@ class FormNotificationMailTest extends TestCase
         $response = $this->post(route('contact.submit'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'message' => 'Hello.',
+            'message' => 'Hello, I would like to know more about your services.',
             ...$this->validSpamToken(),
         ]);
 
@@ -257,15 +257,14 @@ class FormNotificationMailTest extends TestCase
 
     public function test_submitted_html_is_escaped_not_executed_in_the_rendered_admin_email(): void
     {
-        $contactMessage = ContactMessage::create([
+        $contactMessage = new ContactMessage([
             'name' => '<script>alert(1)</script>',
             'email' => 'attacker@example.com',
             'message' => '<img src=x onerror=alert(2)>Hello',
             'subject' => '<b>bold subject</b>',
-            'source_page' => 'contact',
-            'ip_address' => '127.0.0.1',
-            'status' => 'new',
         ]);
+        $contactMessage->forceFill(['source_page' => 'contact', 'ip_address' => '127.0.0.1', 'status' => 'new']);
+        $contactMessage->save();
 
         $rendered = (new ContactAdminNotification($contactMessage))->render();
 
@@ -277,14 +276,13 @@ class FormNotificationMailTest extends TestCase
 
     public function test_submitted_html_is_escaped_not_executed_in_the_rendered_user_confirmation(): void
     {
-        $contactMessage = ContactMessage::create([
+        $contactMessage = new ContactMessage([
             'name' => 'Jane <script>alert(1)</script> Doe',
             'email' => 'jane@example.com',
             'message' => '<svg onload=alert(1)>',
-            'source_page' => 'contact',
-            'ip_address' => '127.0.0.1',
-            'status' => 'new',
         ]);
+        $contactMessage->forceFill(['source_page' => 'contact', 'ip_address' => '127.0.0.1', 'status' => 'new']);
+        $contactMessage->save();
 
         $rendered = (new ContactUserConfirmation($contactMessage))->render();
 

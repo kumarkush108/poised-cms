@@ -577,25 +577,26 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('appointment.submit') }}">
+                    <form method="POST" action="{{ route('appointment.submit') }}" class="js-ajax-form">
                         @csrf
                         @include('partials.spam-protection-fields')
+                        <div class="js-form-feedback"></div>
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Your Name">
+                                    <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Your Name" required minlength="2" maxlength="255">
                                     <label for="name">Your Name</label>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-floating">
-                                    <input type="email" class="form-control" id="mail" name="email" value="{{ old('email') }}" placeholder="Your Email">
+                                    <input type="email" class="form-control" id="mail" name="email" value="{{ old('email') }}" placeholder="Your Email" required maxlength="255">
                                     <label for="mail">Your Email</label>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="mobile" name="phone" value="{{ old('phone') }}" placeholder="Your Mobile">
+                                    <input type="tel" class="form-control" id="mobile" name="phone" value="{{ old('phone') }}" placeholder="Your Mobile" pattern="[0-9+\-\s()]{7,50}" title="Use only numbers, spaces, and + - ( )" maxlength="50">
                                     <label for="mobile">Your Mobile</label>
                                 </div>
                             </div>
@@ -612,10 +613,15 @@
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea class="form-control" placeholder="Leave a message here" id="message" name="message" style="height: 130px">{{ old('message') }}</textarea>
+                                    <textarea class="form-control" placeholder="Leave a message here" id="message" name="message" style="height: 130px" required minlength="10" maxlength="5000">{{ old('message') }}</textarea>
                                     <label for="message">Message</label>
                                 </div>
                             </div>
+                            @if (config('services.recaptcha.site_key'))
+                                <div class="col-12">
+                                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                                </div>
+                            @endif
                             <div class="col-12 text-center">
                                 <button class="btn btn-primary w-100 py-3" type="submit">Submit Now</button>
                             </div>
