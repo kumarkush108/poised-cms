@@ -1,0 +1,582 @@
+/* ==========================================================================
+   Structural redesign v2 — consolidated Header + split-panel Hero
+   Full rewrite (not a patch on top of the v1 restyle — see NOTES.md /
+   PROJECT_PROGRESS.md 2026-07-21 entries for why the three-stacked-bars +
+   full-bleed-photo-carousel structure was replaced rather than just recolored).
+   Colors still derive from the CMS-driven --bs-primary/--bs-secondary/
+   --cms-accent-color custom properties (partials/theme-style.blade.php) so
+   admin Theme Settings keep working — only the structure/tokens are new.
+   ========================================================================== */
+
+:root {
+  --ph-ink: #0b0f19;
+  --ph-body: #4b5568;
+  --ph-muted: #8a94a6;
+  --ph-border: rgba(15, 23, 42, .08);
+  --ph-surface: #ffffff;
+  --ph-surface-soft: #f6f8fb;
+  --ph-radius-sm: 12px;
+  --ph-radius-md: 18px;
+  --ph-radius-lg: 28px;
+  --ph-radius-pill: 999px;
+  --ph-shadow-xs: 0 1px 2px rgba(15, 23, 42, .05);
+  --ph-shadow-sm: 0 8px 24px -14px rgba(15, 23, 42, .16);
+  --ph-shadow-md: 0 24px 48px -18px rgba(15, 23, 42, .2);
+  --ph-shadow-lg: 0 40px 90px -24px rgba(15, 23, 42, .3);
+}
+
+body {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ph-body);
+}
+
+
+/* ---------------------------------------------------------------------- */
+/* Utility strip (was: Top Bar) — thin hairline row, socials + quick links */
+/* only. Address/hours dropped from here entirely (still in footer).      */
+/* ---------------------------------------------------------------------- */
+
+.utility-strip {
+  background: var(--ph-surface);
+  border-bottom: 1px solid var(--ph-border);
+}
+
+.utility-strip__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+}
+
+.utility-strip__social {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.utility-strip__social a {
+  color: var(--ph-muted);
+  font-size: 13px;
+  transition: color .15s ease;
+}
+
+.utility-strip__social a:hover {
+  color: var(--bs-primary);
+}
+
+.utility-strip__links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.utility-strip__links a {
+  color: var(--ph-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.utility-strip__links a:hover {
+  color: var(--ph-ink);
+}
+
+
+/* ---------------------------------------------------------------------- */
+/* Site Header — consolidated single row (was: colored Brand bar + Navbar) */
+/* ---------------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: var(--ph-surface);
+  border-bottom: 1px solid transparent;
+  transition: box-shadow .25s ease, border-color .25s ease, padding .25s ease;
+}
+
+.site-header.is-scrolled {
+  box-shadow: var(--ph-shadow-sm);
+  border-color: var(--ph-border);
+}
+
+.site-header__row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 22px 0;
+  transition: padding .25s ease;
+}
+
+.site-header.is-scrolled .site-header__row {
+  padding: 14px 0;
+}
+
+.site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.site-header__brand img {
+  max-height: 42px;
+  width: auto;
+  display: block;
+}
+
+.site-header__brand-text {
+  font-family: 'Red Rose', Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--bs-primary);
+}
+
+.site-header__collapse {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.site-header .navbar-nav .nav-link {
+  position: relative;
+  padding: 10px 16px;
+  margin: 0 2px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ph-ink);
+  border-radius: var(--ph-radius-pill);
+  transition: color .2s ease, background .2s ease;
+}
+
+.site-header .navbar-nav .nav-link:hover,
+.site-header .navbar-nav .nav-link.active {
+  color: var(--bs-primary);
+  background: var(--ph-surface-soft);
+}
+
+@media (min-width: 992px) {
+  .site-header .nav-item .dropdown-menu {
+    border: none;
+    border-radius: var(--ph-radius-md);
+    box-shadow: var(--ph-shadow-md);
+    padding: 10px;
+    min-width: 220px;
+    margin-top: 10px !important;
+    transform: translateY(6px);
+    transition: opacity .2s ease, transform .2s ease, top .2s ease;
+  }
+
+  .site-header .nav-item:hover .dropdown-menu {
+    transform: translateY(0);
+  }
+
+  .site-header .dropdown-item {
+    border-radius: var(--ph-radius-sm);
+    padding: 10px 14px;
+    font-weight: 500;
+    color: var(--ph-ink);
+    transition: background .15s ease, color .15s ease;
+  }
+
+  .site-header .dropdown-item:hover,
+  .site-header .dropdown-item:focus {
+    background: #eef4ff;
+    background: color-mix(in srgb, var(--bs-primary) 8%, white);
+    color: var(--bs-primary);
+  }
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.site-header__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ph-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header__phone i {
+  color: var(--bs-primary);
+}
+
+.site-header__phone:hover {
+  color: var(--bs-primary);
+}
+
+.site-header__toggle {
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-sm);
+  padding: 8px 10px;
+}
+
+.site-header__toggle:focus {
+  box-shadow: none;
+}
+
+
+/* ---------------------------------------------------------------------- */
+/* Buttons — shared pill CTA system (header + hero)                        */
+/* ---------------------------------------------------------------------- */
+
+.btn-cta,
+.btn-cta-lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ph-radius-pill);
+  font-weight: 600;
+  background: var(--bs-primary);
+  border: 1px solid var(--bs-primary);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -10px rgba(13, 110, 253, .5);
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--bs-primary) 55%, transparent);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn-cta {
+  padding: 10px 22px;
+  font-size: 14.5px;
+}
+
+.btn-cta-lg {
+  padding: 16px 34px;
+  font-size: 16px;
+}
+
+.btn-cta:hover,
+.btn-cta-lg:hover {
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-ghost-lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 30px;
+  border-radius: var(--ph-radius-pill);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ph-ink);
+  border: 1px solid var(--ph-border);
+  background: var(--ph-surface);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color .2s ease, background .2s ease, color .2s ease;
+}
+
+.btn-ghost-lg:hover {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+  background: var(--ph-surface-soft);
+}
+
+
+/* ---------------------------------------------------------------------- */
+/* Enhanced mobile collapse                                                */
+/* ---------------------------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+  .site-header__row {
+    flex-wrap: wrap;
+  }
+
+  .site-header__collapse {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    margin-top: 16px;
+  }
+
+  .site-header__nav {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0;
+  }
+
+  .site-header .navbar-nav .nav-link {
+    border-radius: 0;
+    border-bottom: 1px solid var(--ph-border);
+    padding: 14px 4px;
+    margin: 0;
+  }
+
+  .site-header .navbar-nav .nav-link:hover,
+  .site-header .navbar-nav .nav-link.active {
+    background: transparent;
+    padding-left: 10px;
+  }
+}
+
+.mobile-quick-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ph-border);
+}
+
+.mobile-quick-actions a:first-child {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--ph-radius-sm);
+  background: var(--ph-surface-soft);
+  color: var(--ph-ink);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.mobile-quick-actions .btn-cta {
+  flex: 1;
+  padding: 12px;
+}
+
+
+/* ---------------------------------------------------------------------- */
+/* Hero — split panel (was: full-bleed photo carousel with text overlay)   */
+/* ---------------------------------------------------------------------- */
+
+.hero-carousel {
+  background: var(--ph-surface);
+  overflow: hidden;
+}
+
+.hero-slide {
+  position: relative;
+  padding: 88px 0;
+  min-height: 640px;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(ellipse 60% 55% at 12% 15%, color-mix(in srgb, var(--bs-primary) 12%, transparent), transparent 70%),
+    radial-gradient(ellipse 55% 50% at 90% 85%, color-mix(in srgb, var(--cms-accent-color, #fd7e14) 10%, transparent), transparent 70%),
+    var(--ph-surface-soft);
+}
+
+.hero-slide__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 56px;
+}
+
+.hero-slide__content {
+  max-width: 560px;
+}
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-surface);
+  border: 1px solid var(--ph-border);
+  color: var(--bs-primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  box-shadow: var(--ph-shadow-xs);
+}
+
+.hero-kicker::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+}
+
+.hero-caption h1 {
+  font-family: 'Red Rose', Georgia, serif;
+  font-size: clamp(2.1rem, 2.6vw + 1.4rem, 3.4rem);
+  line-height: 1.12;
+  font-weight: 700;
+  color: var(--ph-ink);
+  margin-bottom: 20px;
+}
+
+.hero-caption p {
+  font-size: clamp(1rem, .4vw + .95rem, 1.1rem);
+  color: var(--ph-body);
+  margin-bottom: 32px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.hero-slide__visual {
+  position: relative;
+}
+
+.hero-slide__blob {
+  position: absolute;
+  inset: -8%;
+  background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--bs-primary) 22%, transparent), transparent 60%);
+  filter: blur(30px);
+  z-index: 0;
+}
+
+.hero-slide__frame {
+  position: relative;
+  z-index: 1;
+  border-radius: var(--ph-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ph-shadow-lg);
+  aspect-ratio: 4 / 3;
+}
+
+.hero-slide__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: heroKenBurns 8s ease-in-out both;
+}
+
+.hero-indicators {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 44px;
+}
+
+.hero-indicators button {
+  width: 28px;
+  height: 4px;
+  border-radius: var(--ph-radius-pill);
+  border: none;
+  background: var(--ph-border);
+  padding: 0;
+  transition: background .2s ease, width .2s ease;
+}
+
+.hero-indicators button.active {
+  background: var(--bs-primary);
+  width: 44px;
+}
+
+/* Entrance animation — small fade+rise, not the old off-screen animate.css
+   slide-ins (see NOTES.md "CSS animations restart when an element goes from
+   display:none to rendered" for why a large-displacement animation on
+   carousel content is a real, recurring off-screen-clipping bug, not just a
+   style choice). Carried forward unchanged from the v1 fix. */
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroKenBurns {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.06);
+  }
+}
+
+.hero-caption .hero-kicker,
+.hero-caption h1,
+.hero-caption p,
+.hero-caption .hero-actions {
+  animation: heroFadeUp .7s ease both;
+}
+
+.hero-caption h1 {
+  animation-delay: .05s;
+}
+
+.hero-caption p {
+  animation-delay: .15s;
+}
+
+.hero-caption .hero-actions {
+  animation-delay: .25s;
+}
+
+@media (max-width: 991.98px) {
+  .hero-slide {
+    padding: 56px 0 48px;
+    min-height: 0;
+  }
+
+  .hero-slide__grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .hero-slide__content {
+    max-width: none;
+    text-align: center;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-indicators {
+    justify-content: center;
+  }
+
+  .hero-slide__visual {
+    order: -1;
+  }
+
+  .hero-slide__frame {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-caption h1 {
+    font-size: 1.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-caption .hero-kicker,
+  .hero-caption h1,
+  .hero-caption p,
+  .hero-caption .hero-actions,
+  .hero-slide__frame img {
+    animation: none;
+  }
+}
